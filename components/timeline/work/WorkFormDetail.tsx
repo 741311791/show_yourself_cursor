@@ -256,7 +256,7 @@ export function WorkFormDetail({
               type="text"
               value={formData.company}
               onChange={(e) => handleInputChange('company', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
               placeholder="请输入公司名称"
             />
@@ -270,7 +270,7 @@ export function WorkFormDetail({
               type="text"
               value={formData.location}
               onChange={(e) => handleInputChange('location', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
               placeholder="请输入公司地址"
             />
@@ -284,7 +284,7 @@ export function WorkFormDetail({
               type="date"
               value={formData.startDate}
               onChange={(e) => handleInputChange('startDate', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
             />
           </div>
@@ -297,7 +297,7 @@ export function WorkFormDetail({
               type="date"
               value={formData.endDate}
               onChange={(e) => handleInputChange('endDate', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
             />
           </div>

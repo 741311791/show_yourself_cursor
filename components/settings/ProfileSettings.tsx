@@ -1,5 +1,9 @@
 "use client"
 
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { AvatarUpload } from "@/components/shared/AvatarUpload"
+
 interface ProfileData {
   name: string
   email: string
@@ -14,26 +18,31 @@ const mockProfile: ProfileData = {
 
 export function ProfileSettings() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* 头像上传 */}
+      <div className="flex justify-center">
+        <AvatarUpload
+          value={mockProfile.avatar}
+          onChange={(url) => console.log('Avatar updated:', url)}
+        />
+      </div>
+
       <div className="grid gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            用户名
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label>用户名</Label>
+          <Input
             type="text"
             defaultValue={mockProfile.name}
-            className="w-full px-3 py-2 border rounded-lg"
+            placeholder="请输入用户名"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            邮箱
-          </label>
-          <input
+        
+        <div className="space-y-2">
+          <Label>邮箱</Label>
+          <Input
             type="email"
             defaultValue={mockProfile.email}
-            className="w-full px-3 py-2 border rounded-lg"
+            placeholder="请输入邮箱"
           />
         </div>
       </div>

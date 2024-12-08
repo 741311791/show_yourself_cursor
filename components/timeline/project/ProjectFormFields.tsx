@@ -52,7 +52,7 @@ export function ProjectFormFields({
           type="text"
           value={project.name}
           onChange={(e) => onUpdate('name', e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+          className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
           disabled={!isEditing}
           placeholder="请输入项目名称"
         />
@@ -68,7 +68,7 @@ export function ProjectFormFields({
           type="text"
           value={project.company}
           onChange={(e) => onUpdate('company', e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+          className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
           disabled={!isEditing}
           placeholder="请输入所属公司"
         />
@@ -85,7 +85,7 @@ export function ProjectFormFields({
             type="date"
             value={project.startDate}
             onChange={(e) => onUpdate('startDate', e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
             disabled={!isEditing}
           />
         </div>
@@ -98,7 +98,7 @@ export function ProjectFormFields({
             type="date"
             value={project.endDate}
             onChange={(e) => onUpdate('endDate', e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
             disabled={!isEditing}
           />
         </div>
@@ -113,7 +113,7 @@ export function ProjectFormFields({
         <textarea
           value={project.description}
           onChange={(e) => onUpdate('description', e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 min-h-[100px]"
+          className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 min-h-[100px]"
           disabled={!isEditing}
           placeholder="请输入项目描述"
         />
@@ -129,7 +129,7 @@ export function ProjectFormFields({
           type="text"
           value={project.techStack}
           onChange={(e) => onUpdate('techStack', e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+          className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
           disabled={!isEditing}
           placeholder="请输入使用的技术栈（选填）"
         />

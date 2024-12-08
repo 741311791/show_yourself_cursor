@@ -1,6 +1,6 @@
 import { Sidebar } from "@/components/layout/Sidebar"
 import { Toolbar } from "@/components/layout/Toolbar"
-import { ResumeGrid } from "@/components/layout/ResumeGrid"
+import { ResumeGrid } from "@/components/resume/ResumeGrid"
 
 export default function Home() {
   return (

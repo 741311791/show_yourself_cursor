@@ -194,7 +194,7 @@ export function EducationFormDetail({
               type="text"
               value={formData.school}
               onChange={(e) => handleInputChange('school', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
               placeholder="请输入学校名称"
             />
@@ -208,7 +208,7 @@ export function EducationFormDetail({
               type="text"
               value={formData.location}
               onChange={(e) => handleInputChange('location', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
               placeholder="请输入学校地址"
             />
@@ -222,7 +222,7 @@ export function EducationFormDetail({
               type="date"
               value={formData.startDate}
               onChange={(e) => handleInputChange('startDate', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
             />
           </div>
@@ -235,7 +235,7 @@ export function EducationFormDetail({
               type="date"
               value={formData.endDate}
               onChange={(e) => handleInputChange('endDate', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
             />
           </div>
@@ -261,7 +261,7 @@ export function EducationFormDetail({
               type="text"
               value={formData.major}
               onChange={(e) => handleInputChange('major', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
               placeholder="请输入所学专业"
             />
@@ -275,7 +275,7 @@ export function EducationFormDetail({
               type="text"
               value={formData.degree}
               onChange={(e) => handleInputChange('degree', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
               placeholder="请输入获得学位"
             />
@@ -289,7 +289,7 @@ export function EducationFormDetail({
               type="text"
               value={formData.gpa}
               onChange={(e) => handleInputChange('gpa', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
               placeholder="请输入GPA或其他成绩"
             />
@@ -303,7 +303,7 @@ export function EducationFormDetail({
               type="text"
               value={formData.courses}
               onChange={(e) => handleInputChange('courses', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
               disabled={!isEditing}
               placeholder="请输入主要课程"
             />
@@ -340,7 +340,7 @@ export function EducationFormDetail({
                   value={field.title}
                   onChange={(e) => updateCustomField(field.id, 'title', e.target.value)}
                   placeholder="标题"
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                   disabled={!isEditing}
                 />
               </div>
@@ -350,7 +350,7 @@ export function EducationFormDetail({
                   value={field.content}
                   onChange={(e) => updateCustomField(field.id, 'content', e.target.value)}
                   placeholder="内容"
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#FF4D4F] focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2  focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                   disabled={!isEditing}
                 />
               </div>

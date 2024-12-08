@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import { type NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   images: {
@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'picsum.photos',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'liancheng-app.oss-cn-hangzhou.aliyuncs.com',
+        port: '',
+        pathname: '/avatars/**',
       },
     ],
   },
