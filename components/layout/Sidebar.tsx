@@ -37,7 +37,7 @@ const timelineMenuItems: MenuItem[] = [
       { icon: GraduationCap, label: "教育经历", href: "/timeline/education" },
       { icon: Briefcase, label: "工作经历", href: "/timeline/work" },
       { icon: Folder, label: "项目经历", href: "/timeline/project" },
-      { icon: Heart, label: "兴趣爱好", href: "/timeline/interests" },
+      { icon: Heart, label: "兴趣爱好", href: "/timeline/hobby" },
       { icon: Languages, label: "语言", href: "/timeline/languages" },
       { icon: Award, label: "技能", href: "/timeline/skills" },
       { icon: Medal, label: "获奖", href: "/timeline/awards" },

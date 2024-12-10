@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'liancheng-app.oss-cn-hangzhou.aliyuncs.com',
         port: '',
-        pathname: '/avatars/**',
+        pathname: '/**',
       },
     ],
   },

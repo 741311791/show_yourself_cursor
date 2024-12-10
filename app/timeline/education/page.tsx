@@ -1,5 +1,5 @@
 import { MainLayout } from "@/components/layout/MainLayout"
-import { EducationTimeline } from "@/components/timeline/education/EducationTimeline"
+import { EducationTimeline } from "@/components/timeline/education"
 
 export default function EducationPage() {
   return (

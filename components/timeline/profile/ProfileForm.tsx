@@ -5,7 +5,7 @@ import { motion } from "motion/react"
 import { 
   User, Mail, Phone, MapPin, Globe, 
   Calendar, FileText, Save, Edit2,
-  Plus, Trash2
+  Plus, Trash2, Loader2
 } from "lucide-react"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { AvatarUpload } from "@/components/shared/AvatarUpload"
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { Alert } from "@/components/shared/Alert"
 
 // 动画配置
 const container = {
@@ -37,20 +38,97 @@ interface CustomField {
   content: string
 }
 
+interface Profile {
+  avatar: string
+  name: string
+  email: string
+  phone: string
+  birthday: string
+  address: string
+  website: string
+  customFields: CustomField[]
+  summary: string
+}
+
+const mockProfile: Profile = {
+  avatar: "",
+  name: "示例用户",
+  email: "example@email.com",
+  phone: "13800138000",
+  birthday: "1990-01-01",
+  address: "北京市",
+  website: "https://example.com",
+  customFields: [],
+  summary: "这是一段示例的个人简介..."
+}
+
 export function ProfileForm() {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [customFields, setCustomFields] = useState<CustomField[]>([])
-  const [avatar, setAvatar] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [alertState, setAlertState] = useState<{
+    show: boolean
+    type: 'success' | 'error'
+    message: string
+  }>({
+    show: false,
+    type: 'success',
+    message: ''
+  })
+  
+  // 表单数据状态
+  const [profile, setProfile] = useState<Profile>({
+    avatar: "",
+    name: "",
+    email: "",
+    phone: "",
+    birthday: "",
+    address: "",
+    website: "",
+    customFields: [],
+    summary: ""
+  })
 
+  // 获取个人信息
   useEffect(() => {
-    setIsEditing(true)
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        
+        // TODO: 替换为实际的 API 调用
+        // const response = await fetch('/api/profile')
+        // const data = await response.json()
+        
+        // 模拟 API 调用
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        const data: Profile | null = null
+
+        // 如果返回的数据为空，使用 mock 数据
+        setProfile(data || mockProfile)
+        setIsEditing(!data) // 如果是新用户（没有数据），自动进入编辑模式
+      } catch (error) {
+        console.error('获取个人信息失败:', error)
+        setError('获取个人信息失败，请刷新页面重试')
+        // 发生错误时也使用 mock 数据
+        setProfile(mockProfile)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProfile()
   }, [])
 
   const handleSave = async () => {
     try {
       setIsSaving(true)
       // TODO: 调用保存 API
+      // await fetch('/api/profile', {
+      //   method: 'POST',
+      //   body: JSON.stringify(profile)
+      // })
       await new Promise(resolve => setTimeout(resolve, 1000))
       setIsEditing(false)
     } catch (error) {
@@ -65,26 +143,52 @@ export function ProfileForm() {
   }
 
   const handleAddCustomField = () => {
-    setCustomFields(prev => [
+    setProfile(prev => ({
       ...prev,
-      {
-        id: Math.random().toString(),
-        title: "",
-        content: ""
-      }
-    ])
+      customFields: [
+        ...prev.customFields,
+        {
+          id: Math.random().toString(),
+          title: "",
+          content: ""
+        }
+      ]
+    }))
   }
 
   const handleUpdateCustomField = (id: string, field: keyof CustomField, value: string) => {
-    setCustomFields(prev => 
-      prev.map(item => 
+    setProfile(prev => ({
+      ...prev,
+      customFields: prev.customFields.map(item => 
         item.id === id ? { ...item, [field]: value } : item
       )
-    )
+    }))
   }
 
   const handleRemoveCustomField = (id: string) => {
-    setCustomFields(prev => prev.filter(item => item.id !== id))
+    setProfile(prev => ({
+      ...prev,
+      customFields: prev.customFields.filter(item => item.id !== id)
+    }))
+  }
+
+  const showAlert = (type: 'success' | 'error', message: string) => {
+    setAlertState({ show: true, type, message })
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
+
+  // 如果正在加载，显示加载状态
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">加载个人信息...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -94,6 +198,15 @@ export function ProfileForm() {
       animate="show"
       variants={container}
     >
+      {/* 如果有错误，显示错误提示 */}
+      {error && (
+        <motion.div variants={item}>
+          <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
+            {error}
+          </div>
+        </motion.div>
+      )}
+
       {/* 基本信息 */}
       <motion.div variants={item}>
         <Card>
@@ -107,8 +220,8 @@ export function ProfileForm() {
             {/* 头像上传 */}
             <div className="flex justify-center">
               <AvatarUpload
-                value={avatar}
-                onChange={setAvatar}
+                value={profile.avatar}
+                onChange={(url) => setProfile(prev => ({ ...prev, avatar: url }))}
                 disabled={!isEditing}
               />
             </div>
@@ -120,7 +233,8 @@ export function ProfileForm() {
                   姓名
                 </Label>
                 <Input
-                  type="text"
+                  value={profile.name}
+                  onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
                   disabled={!isEditing}
                   placeholder="请输入姓名"
                 />
@@ -133,6 +247,8 @@ export function ProfileForm() {
                 </Label>
                 <Input
                   type="email"
+                  value={profile.email}
+                  onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
                   disabled={!isEditing}
                   placeholder="请输入邮箱"
                 />
@@ -145,6 +261,8 @@ export function ProfileForm() {
                 </Label>
                 <Input
                   type="tel"
+                  value={profile.phone}
+                  onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
                   disabled={!isEditing}
                   placeholder="请输入电话"
                 />
@@ -157,6 +275,8 @@ export function ProfileForm() {
                 </Label>
                 <Input
                   type="date"
+                  value={profile.birthday}
+                  onChange={(e) => setProfile(prev => ({ ...prev, birthday: e.target.value }))}
                   disabled={!isEditing}
                 />
               </div>
@@ -168,6 +288,8 @@ export function ProfileForm() {
                 </Label>
                 <Input
                   type="text"
+                  value={profile.address}
+                  onChange={(e) => setProfile(prev => ({ ...prev, address: e.target.value }))}
                   disabled={!isEditing}
                   placeholder="请输入地址"
                 />
@@ -180,6 +302,8 @@ export function ProfileForm() {
                 </Label>
                 <Input
                   type="url"
+                  value={profile.website}
+                  onChange={(e) => setProfile(prev => ({ ...prev, website: e.target.value }))}
                   disabled={!isEditing}
                   placeholder="请输入个人网站"
                 />
@@ -187,9 +311,9 @@ export function ProfileForm() {
             </div>
 
             {/* 自定义字段部分 */}
-            {customFields.length > 0 && (
+            {profile.customFields.length > 0 && (
               <div className="border-t pt-6 space-y-4">
-                {customFields.map(field => (
+                {profile.customFields.map(field => (
                   <div key={field.id} className="relative group">
                     <div className="flex items-center gap-4">
                       <Input
@@ -249,8 +373,8 @@ export function ProfileForm() {
           </CardHeader>
           <CardContent>
             <AIRichTextEditor
-              content=""
-              onChange={() => {}}
+              content={profile.summary}
+              onChange={(content) => setProfile(prev => ({ ...prev, summary: content }))}
               isEditing={isEditing}
               onAIGenerate={async () => {
                 console.log('AI 生成个人简介')
@@ -287,6 +411,13 @@ export function ProfileForm() {
           )}
         </Button>
       </motion.div>
+
+      {/* Alert 组件 */}
+      <Alert
+        show={alertState.show}
+        type={alertState.type}
+        message={alertState.message}
+      />
     </motion.div>
   )
 } 

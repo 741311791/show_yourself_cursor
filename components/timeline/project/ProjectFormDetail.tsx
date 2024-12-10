@@ -2,9 +2,19 @@
 
 import React, { useState } from "react"
 import { motion } from "motion/react"
-import { Save, Edit2, FileText } from "lucide-react"
+import { 
+  FileText, MapPin, Calendar, Code, Star,
+  ArrowLeft, Save, Edit2
+} from "lucide-react"
 import { Project } from "@/types/project"
-import { ProjectFormFields } from "./ProjectFormFields"
+import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+import { Alert } from "@/components/shared/Alert"
 
 // 动画配置
 const container = {
@@ -36,6 +46,15 @@ export function ProjectFormDetail({
   const [formData, setFormData] = useState<Project>(project)
   const [isEditing, setIsEditing] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [alertState, setAlertState] = useState<{
+    show: boolean
+    type: 'success' | 'error'
+    message: string
+  }>({
+    show: false,
+    type: 'success',
+    message: ''
+  })
 
   const handleInputChange = (field: keyof Project, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -45,12 +64,13 @@ export function ProjectFormDetail({
     try {
       setIsSaving(true)
       // TODO: 调用更新项目 API
-      await new Promise(resolve => setTimeout(resolve, 1000)) // 模拟 API 调用
-      
+      await new Promise(resolve => setTimeout(resolve, 1000))
       onSave(formData)
       setIsEditing(false)
+      showAlert('success', '保存成功')
     } catch (error) {
       console.error('保存失败:', error)
+      showAlert('error', '保存失败，请重试')
     } finally {
       setIsSaving(false)
     }
@@ -60,6 +80,13 @@ export function ProjectFormDetail({
     setIsEditing(true)
   }
 
+  const showAlert = (type: 'success' | 'error', message: string) => {
+    setAlertState({ show: true, type, message })
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
+
   return (
     <motion.div 
       className="max-w-3xl mx-auto space-y-8"
@@ -67,28 +94,150 @@ export function ProjectFormDetail({
       animate="show"
       variants={container}
     >
-      <motion.button
-        variants={item}
-        onClick={onCancel}
-        className="mb-4 text-gray-500 hover:text-gray-700 transition-colors"
-      >
-        ← 返回列表
-      </motion.button>
+      {/* 返回按钮 */}
+      <motion.div variants={item}>
+        <Button
+          variant="ghost"
+          onClick={onCancel}
+          className="gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          返回列表
+        </Button>
+      </motion.div>
 
-      {/* 项目信息 */}
-      <motion.div 
-        variants={item}
-        className="space-y-4 bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
-      >
-        <div className="flex items-center gap-2 text-gray-900 mb-6">
-          <FileText size={20} className="text-[#FF4D4F]" />
-          <h2 className="text-xl font-semibold">项目信息</h2>
-        </div>
-        <ProjectFormFields
-          project={formData}
-          isEditing={isEditing}
-          onUpdate={handleInputChange}
-        />
+      {/* 基本信息 */}
+      <motion.div variants={item}>
+        <Card>
+          <CardHeader className="space-y-1">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle>基本信息</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="col-span-2 space-y-2">
+                <Label className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  项目名称
+                </Label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  disabled={!isEditing}
+                  placeholder="请输入项目名称"
+                />
+              </div>
+
+              <div className="col-span-2 space-y-2">
+                <Label className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  所属公司
+                </Label>
+                <Input
+                  value={formData.company}
+                  onChange={(e) => handleInputChange('company', e.target.value)}
+                  disabled={!isEditing}
+                  placeholder="请输入所属公司"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  开始时间
+                </Label>
+                <Input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => handleInputChange('startDate', e.target.value)}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  结束时间
+                </Label>
+                <Input
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) => handleInputChange('endDate', e.target.value)}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="col-span-2 space-y-2">
+                <Label className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  项目描述
+                </Label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  disabled={!isEditing}
+                  placeholder="请输入项目描述"
+                  className="min-h-[100px]"
+                />
+              </div>
+
+              <div className="col-span-2 space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Code className="h-4 w-4 text-muted-foreground" />
+                  技术栈
+                </Label>
+                <Input
+                  value={formData.techStack}
+                  onChange={(e) => handleInputChange('techStack', e.target.value)}
+                  disabled={!isEditing}
+                  placeholder="请输入使用的技术栈"
+                />
+              </div>
+            </div>
+
+            {/* 核心项目标记 */}
+            {formData.source === 'custom' && (
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => handleInputChange('isCore', !formData.isCore)}
+                  disabled={!isEditing}
+                  className={cn(
+                    "gap-2",
+                    formData.isCore && "text-primary border-primary hover:text-primary hover:border-primary"
+                  )}
+                >
+                  <Star className="h-4 w-4" />
+                  {formData.isCore ? "取消核心项目" : "标记为核心项目"}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* 项目成果 */}
+      <motion.div variants={item}>
+        <Card>
+          <CardHeader className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-primary" />
+              <CardTitle>项目成果</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <AIRichTextEditor
+              content={formData.achievement}
+              onChange={(html) => handleInputChange('achievement', html)}
+              isEditing={isEditing}
+              onAIGenerate={async () => {
+                console.log('AI 生成项目成果')
+              }}
+            />
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* 保存/编辑按钮 */}
@@ -99,33 +248,40 @@ export function ProjectFormDetail({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <button
+        <Button
           onClick={isEditing ? handleSave : handleEdit}
           disabled={isSaving}
-          className={`
-            flex items-center gap-2 px-8 py-3 rounded-xl text-white 
-            transition-all duration-200 transform hover:scale-105
-            shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]
-            ${isEditing
-              ? 'bg-gradient-to-r from-[#FF4D4F] to-[#FF7875]'
-              : 'bg-gradient-to-r from-[#4F46E5] to-[#7C3AED]'
-            }
-            ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}
-          `}
+          size="lg"
+          className={cn(
+            "gap-2",
+            isEditing
+              ? "bg-gradient-to-r from-primary to-primary/80"
+              : "bg-gradient-to-r from-[#4F46E5] to-[#7C3AED]",
+            "hover:shadow-lg hover:shadow-primary/20",
+            "transform hover:-translate-y-0.5 transition-all",
+            isSaving && "opacity-50 cursor-not-allowed"
+          )}
         >
           {isEditing ? (
             <>
-              <Save size={20} className={isSaving ? 'animate-spin' : ''} />
+              <Save className={cn("h-5 w-5", isSaving && "animate-spin")} />
               <span className="font-medium">{isSaving ? '保存中...' : '保存'}</span>
             </>
           ) : (
             <>
-              <Edit2 size={20} />
+              <Edit2 className="h-5 w-5" />
               <span className="font-medium">编辑</span>
             </>
           )}
-        </button>
+        </Button>
       </motion.div>
+
+      {/* Alert 组件 */}
+      <Alert
+        show={alertState.show}
+        type={alertState.type}
+        message={alertState.message}
+      />
     </motion.div>
   )
 } 

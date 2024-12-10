@@ -3,9 +3,8 @@
 import { useState } from 'react'
 import { Upload as UploadIcon, Loader2 } from 'lucide-react'
 import Image from 'next/image'
-import OSS from 'ali-oss'
 import { useToast } from "@/components/ui/use-toast"
-import { cn } from "@/lib/utils"
+import { cn, uploadToOSS } from "@/lib/utils"
 
 interface AvatarUploadProps {
   value?: string
@@ -22,9 +21,8 @@ export function AvatarUpload({ value, onChange, disabled }: AvatarUploadProps) {
     const file = event.target.files?.[0]
     if (!file) return
 
-    // 验证文件大小（2MB）
-    const isLtMaxSize = file.size / 1024 / 1024 < 10
-    if (!isLtMaxSize) {
+    // 验证文件大小（10MB）
+    if (file.size / 1024 / 1024 > 10) {
       toast({
         variant: "destructive",
         title: "错误",
@@ -35,37 +33,10 @@ export function AvatarUpload({ value, onChange, disabled }: AvatarUploadProps) {
 
     try {
       setLoading(true)
-      
-      // 获取 STS 凭证
-      const res = await fetch('/api/oss/sts')
-      const credentials = await res.json()
-      
-      // 初始化 OSS 客户端
-      const client = new OSS({
-        region: process.env.NEXT_PUBLIC_OSS_REGION,
-        accessKeyId: credentials.AccessKeyId,
-        accessKeySecret: credentials.AccessKeySecret,
-        stsToken: credentials.SecurityToken,
-        bucket: process.env.NEXT_PUBLIC_OSS_BUCKET,
-        secure: true,
-        endpoint: process.env.NEXT_PUBLIC_OSS_ENDPOINT,
-        timeout: 60000
+      const url = await uploadToOSS(file, {
+        directory: 'avatars',
+        onProgress: setProgress
       })
-
-      // 生成唯一文件名
-      const ext = file.name.split('.').pop()
-      const filename = `avatars/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-      // 上传文件
-      const result = await client.multipartUpload(filename, file, {
-        progress: (p) => {
-          setProgress(Math.floor(p * 100))
-        }
-      })
-
-      // 获取文件 URL
-      const url = client.signatureUrl(result.name)
-      
       onChange?.(url)
       toast({
         title: "成功",
