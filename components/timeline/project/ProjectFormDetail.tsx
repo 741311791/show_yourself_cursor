@@ -4,19 +4,19 @@ import React, { useState } from "react"
 import { motion } from "motion/react"
 import { 
   FileText, MapPin, Calendar, Code, Star,
-  ArrowLeft, Save, Edit2
+  Save, Edit2, Camera, Plus, Trash2
 } from "lucide-react"
 import { Project } from "@/types/project"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Alert } from "@/components/shared/Alert"
 
-// 动画配置
 const container = {
   hidden: { opacity: 0 },
   show: {
@@ -45,6 +45,7 @@ export function ProjectFormDetail({
 }: ProjectFormDetailProps) {
   const [formData, setFormData] = useState<Project>(project)
   const [isEditing, setIsEditing] = useState(true)
+  const [preview, setPreview] = useState<string | null>(project.photo)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean
@@ -80,6 +81,35 @@ export function ProjectFormDetail({
     setIsEditing(true)
   }
 
+  // 自定义字段相关处理函数
+  const addCustomField = () => {
+    const newField = {
+      id: Math.random().toString(),
+      title: '',
+      content: ''
+    }
+    setFormData(prev => ({
+      ...prev,
+      customFields: [...prev.customFields, newField]
+    }))
+  }
+
+  const removeCustomField = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customFields: prev.customFields.filter(field => field.id !== id)
+    }))
+  }
+
+  const updateCustomField = (id: string, field: 'title' | 'content', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customFields: prev.customFields.map(item => 
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    }))
+  }
+
   const showAlert = (type: 'success' | 'error', message: string) => {
     setAlertState({ show: true, type, message })
     setTimeout(() => {
@@ -94,112 +124,106 @@ export function ProjectFormDetail({
       animate="show"
       variants={container}
     >
-      {/* 返回按钮 */}
       <motion.div variants={item}>
         <Button
           variant="ghost"
           onClick={onCancel}
-          className="gap-2 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4" />
-          返回列表
+          ← 返回列表
         </Button>
       </motion.div>
 
       {/* 基本信息 */}
       <motion.div variants={item}>
         <Card>
-          <CardHeader className="space-y-1">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <CardTitle>基本信息</CardTitle>
-            </div>
+          <CardHeader className="flex-row items-center gap-2 pb-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">基本信息</h2>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="col-span-2 space-y-2">
-                <Label className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  项目名称
-                </Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="请输入项目名称"
-                />
-              </div>
+          <CardContent className="grid grid-cols-2 gap-6">
+            <div className="col-span-2 space-y-2">
+              <Label className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                项目名称
+              </Label>
+              <Input
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                disabled={!isEditing}
+                placeholder="请输入项目名称"
+              />
+            </div>
 
-              <div className="col-span-2 space-y-2">
-                <Label className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  所属公司
-                </Label>
-                <Input
-                  value={formData.company}
-                  onChange={(e) => handleInputChange('company', e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="请输入所属公司"
-                />
-              </div>
+            <div className="col-span-2 space-y-2">
+              <Label className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                所属公司
+              </Label>
+              <Input
+                value={formData.company}
+                onChange={(e) => handleInputChange('company', e.target.value)}
+                disabled={!isEditing}
+                placeholder="请输入所属公司"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  开始时间
-                </Label>
-                <Input
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => handleInputChange('startDate', e.target.value)}
-                  disabled={!isEditing}
-                />
-              </div>
+            <div>
+              <Label className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                开始时间
+              </Label>
+              <Input
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => handleInputChange('startDate', e.target.value)}
+                disabled={!isEditing}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  结束时间
-                </Label>
-                <Input
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) => handleInputChange('endDate', e.target.value)}
-                  disabled={!isEditing}
-                />
-              </div>
+            <div>
+              <Label className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                结束时间
+              </Label>
+              <Input
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => handleInputChange('endDate', e.target.value)}
+                disabled={!isEditing}
+              />
+            </div>
 
-              <div className="col-span-2 space-y-2">
-                <Label className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  项目描述
-                </Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="请输入项目描述"
-                  className="min-h-[100px]"
-                />
-              </div>
+            <div className="col-span-2 space-y-2">
+              <Label className="flex items-center gap-2">
+                <Code className="h-4 w-4 text-muted-foreground" />
+                技术栈
+              </Label>
+              <Input
+                value={formData.techStack}
+                onChange={(e) => handleInputChange('techStack', e.target.value)}
+                disabled={!isEditing}
+                placeholder="请输入使用的技术栈"
+              />
+            </div>
 
-              <div className="col-span-2 space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Code className="h-4 w-4 text-muted-foreground" />
-                  技术栈
-                </Label>
-                <Input
-                  value={formData.techStack}
-                  onChange={(e) => handleInputChange('techStack', e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="请输入使用的技术栈"
-                />
-              </div>
+            <div className="col-span-2 space-y-2">
+              <Label className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                项目描述
+              </Label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                disabled={!isEditing}
+                placeholder="请输入项目描述"
+                className="min-h-[100px]"
+              />
             </div>
 
             {/* 核心项目标记 */}
             {formData.source === 'custom' && (
-              <div className="flex items-center gap-2 pt-4">
+              <div className="col-span-2 flex items-center gap-2">
                 <Button
                   variant="outline"
                   onClick={() => handleInputChange('isCore', !formData.isCore)}
@@ -218,14 +242,76 @@ export function ProjectFormDetail({
         </Card>
       </motion.div>
 
+      {/* 自定义信息 */}
+      <motion.div variants={item}>
+        <Card>
+          <CardHeader className="flex-row items-center justify-between pb-2">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-semibold">自定义信息</h2>
+            </div>
+            {isEditing && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addCustomField}
+                className={cn(
+                  "gap-2",
+                  "text-muted-foreground hover:text-foreground",
+                  "border-dashed border-muted-foreground/50"
+                )}
+              >
+                <Plus className="h-4 w-4" />
+                添加自定义字段
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {formData.customFields.map(field => (
+              <div key={field.id} className="flex items-start gap-3 group">
+                <div className="w-[25%]">
+                  <Input
+                    value={field.title}
+                    onChange={(e) => updateCustomField(field.id, 'title', e.target.value)}
+                    placeholder="标题"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="flex-1">
+                  <Input
+                    value={field.content}
+                    onChange={(e) => updateCustomField(field.id, 'content', e.target.value)}
+                    placeholder="内容"
+                    disabled={!isEditing}
+                  />
+                </div>
+                {isEditing && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeCustomField(field.id)}
+                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            {formData.customFields.length === 0 && isEditing && (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>点击上方按钮添加自定义信息</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* 项目成果 */}
       <motion.div variants={item}>
         <Card>
-          <CardHeader className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-primary" />
-              <CardTitle>项目成果</CardTitle>
-            </div>
+          <CardHeader className="flex-row items-center gap-2 pb-2">
+            <Star className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">项目成果</h2>
           </CardHeader>
           <CardContent>
             <AIRichTextEditor
@@ -233,9 +319,57 @@ export function ProjectFormDetail({
               onChange={(html) => handleInputChange('achievement', html)}
               isEditing={isEditing}
               onAIGenerate={async () => {
+                // TODO: 实现 AI 生成功能
                 console.log('AI 生成项目成果')
               }}
             />
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* 项目总结 */}
+      <motion.div variants={item}>
+        <Card>
+          <CardHeader className="flex-row items-center gap-2 pb-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">项目总结</h2>
+          </CardHeader>
+          <CardContent>
+            <AIRichTextEditor
+              content={formData.summary}
+              onChange={(html) => handleInputChange('summary', html)}
+              isEditing={isEditing}
+              onAIGenerate={async () => {
+                // TODO: 实现 AI 生成功能
+                console.log('AI 生成项目总结')
+              }}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* 项目图片 */}
+      <motion.div variants={item}>
+        <Card>
+          <CardHeader className="flex-row items-center gap-2 pb-2">
+            <Camera className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">项目图片</h2>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground text-center">
+              上传一张与该项目相关的照片，可以是项目截图或效果图等。该照片将展示在项目列表和Web简历中。
+            </p>
+            <div className="flex justify-center">
+              <ImageUpload
+                value={preview}
+                onChange={(url) => {
+                  setPreview(url)
+                  handleInputChange('photo', url)
+                }}
+                disabled={!isEditing}
+                tip="点击上传项目图片"
+              />
+            </div>
           </CardContent>
         </Card>
       </motion.div>

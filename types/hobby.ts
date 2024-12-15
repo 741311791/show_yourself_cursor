@@ -4,6 +4,12 @@ export interface HobbyAward {
   date: string
 }
 
+interface CustomField {
+  id: string
+  title: string
+  content: string
+}
+
 export interface Hobby {
   id: string
   name: string
@@ -13,4 +19,5 @@ export interface Hobby {
   createdAt: string
   startDate: string
   awards: HobbyAward[]
+  customFields: CustomField[]
 } 

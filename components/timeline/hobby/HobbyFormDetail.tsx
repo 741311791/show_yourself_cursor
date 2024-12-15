@@ -2,16 +2,31 @@
 
 import React, { useState } from "react"
 import { motion } from "motion/react"
-import { ArrowLeft, FileText, Image as ImageIcon, Trash2, Calendar, Plus, Edit2, Save, } from "lucide-react"
+import { FileText, Calendar, Camera, Plus, Save, Edit2, Trash2 } from "lucide-react"
 import { Hobby, HobbyAward } from "@/types/hobby"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { Alert } from "@/components/shared/Alert"
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+}
 
 interface HobbyFormDetailProps {
   hobby: Hobby
@@ -19,22 +34,6 @@ interface HobbyFormDetailProps {
   onCancel: () => void
 }
 
-// 动画变体配置
-const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
-  
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  }
-  
 export function HobbyFormDetail({
   hobby,
   onSave,
@@ -60,13 +59,40 @@ export function HobbyFormDetail({
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  // 自定义字段相关处理函数
+  const addCustomField = () => {
+    const newField = {
+      id: Math.random().toString(),
+      title: '',
+      content: ''
+    }
+    setFormData(prev => ({
+      ...prev,
+      customFields: [...prev.customFields, newField]
+    }))
+  }
+
+  const removeCustomField = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customFields: prev.customFields.filter(field => field.id !== id)
+    }))
+  }
+
+  const updateCustomField = (id: string, field: 'title' | 'content', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customFields: prev.customFields.map(item => 
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    }))
+  }
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
-
-    // TODO: 实现多文件上传
-    const urls = files.map(file => URL.createObjectURL(file))
     
+    const urls = files.map(file => URL.createObjectURL(file))
     setFormData(prev => ({
       ...prev,
       photos: [...prev.photos, ...urls],
@@ -74,19 +100,21 @@ export function HobbyFormDetail({
     }))
   }
 
-  const showAlert = (type: 'success' | 'error', message: string) => {
-    setAlertState({ show: true, type, message })
-    setTimeout(() => {
-      setAlertState(prev => ({ ...prev, show: false }))
-    }, 3000)  // 3秒后自动隐藏
+  const handleRemovePhoto = (indexToRemove: number) => {
+    setFormData(prev => ({
+      ...prev,
+      photos: prev.photos.filter((_, index) => index !== indexToRemove),
+      cover: prev.cover === prev.photos[indexToRemove] 
+        ? prev.photos.filter((_, index) => index !== indexToRemove)[0] || null
+        : prev.cover
+    }))
   }
 
   const handleSave = async () => {
     try {
       setIsSaving(true)
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      onSave({...formData})
+      onSave(formData)
       setIsEditing(false)
       showAlert('success', '保存成功')
     } catch (error) {
@@ -101,15 +129,11 @@ export function HobbyFormDetail({
     setIsEditing(true)
   }
 
-  const handleRemovePhoto = (indexToRemove: number) => {
-    setFormData(prev => ({
-      ...prev,
-      photos: prev.photos.filter((_, index) => index !== indexToRemove),
-      // 如果删除的是封面图片，则更新封面为剩余图片中的第一张或 null
-      cover: prev.cover === prev.photos[indexToRemove] 
-        ? prev.photos.filter((_, index) => index !== indexToRemove)[0] || null
-        : prev.cover
-    }))
+  const showAlert = (type: 'success' | 'error', message: string) => {
+    setAlertState({ show: true, type, message })
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }))
+    }, 3000)
   }
 
   return (
@@ -119,26 +143,22 @@ export function HobbyFormDetail({
       animate="show"
       variants={container}
     >
-      {/* 返回按钮 */}
-      <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+      <motion.div variants={item}>
         <Button
           variant="ghost"
           onClick={onCancel}
-          className="gap-2 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4" />
-          返回列表
+          ← 返回列表
         </Button>
       </motion.div>
 
       {/* 基本信息 */}
-      <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+      <motion.div variants={item}>
         <Card>
-          <CardHeader className="space-y-1">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <CardTitle>基本信息</CardTitle>
-            </div>
+          <CardHeader className="flex-row items-center gap-2 pb-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">基本信息</h2>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
@@ -172,7 +192,7 @@ export function HobbyFormDetail({
                 <Label>所获荣誉</Label>
                 {isEditing && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       const newAward: HobbyAward = {
@@ -185,9 +205,13 @@ export function HobbyFormDetail({
                         awards: [...prev.awards, newAward]
                       }))
                     }}
-                    className="text-primary hover:text-primary"
+                    className={cn(
+                      "gap-2",
+                      "text-muted-foreground hover:text-foreground",
+                      "border-dashed border-muted-foreground/50"
+                    )}
                   >
-                    <Plus className="h-4 w-4 mr-1" />
+                    <Plus className="h-4 w-4" />
                     添加荣誉
                   </Button>
                 )}
@@ -248,16 +272,103 @@ export function HobbyFormDetail({
         </Card>
       </motion.div>
 
-      {/* 图片上传 */}
-      <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+      {/* 自定义信息 */}
+      <motion.div variants={item}>
         <Card>
-          <CardHeader className="space-y-1">
+          <CardHeader className="flex-row items-center justify-between pb-2">
             <div className="flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-primary" />
-              <CardTitle>照片墙</CardTitle>
+              <FileText className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-semibold">自定义信息</h2>
             </div>
+            {isEditing && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addCustomField}
+                className={cn(
+                  "gap-2",
+                  "text-muted-foreground hover:text-foreground",
+                  "border-dashed border-muted-foreground/50"
+                )}
+              >
+                <Plus className="h-4 w-4" />
+                添加自定义字段
+              </Button>
+            )}
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
+            {formData.customFields.map(field => (
+              <div key={field.id} className="flex items-start gap-3 group">
+                <div className="w-[25%]">
+                  <Input
+                    value={field.title}
+                    onChange={(e) => updateCustomField(field.id, 'title', e.target.value)}
+                    placeholder="标题"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="flex-1">
+                  <Input
+                    value={field.content}
+                    onChange={(e) => updateCustomField(field.id, 'content', e.target.value)}
+                    placeholder="内容"
+                    disabled={!isEditing}
+                  />
+                </div>
+                {isEditing && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeCustomField(field.id)}
+                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            {formData.customFields.length === 0 && isEditing && (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>点击上方按钮添加自定义信息</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* 我和它的故事 */}
+      <motion.div variants={item}>
+        <Card>
+          <CardHeader className="flex-row items-center gap-2 pb-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">我和它的故事</h2>
+          </CardHeader>
+          <CardContent>
+            <AIRichTextEditor
+              content={formData.description}
+              onChange={(html) => handleInputChange('description', html)}
+              isEditing={isEditing}
+              onAIGenerate={async () => {
+                // TODO: 实现 AI 生成功能
+                console.log('AI 生成故事')
+              }}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* 照片墙 */}
+      <motion.div variants={item}>
+        <Card>
+          <CardHeader className="flex-row items-center gap-2 pb-2">
+            <Camera className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">照片墙</h2>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground text-center">
+              上传与该兴趣爱好相关的照片，这些照片将展示在兴趣爱好列表和Web简历中。
+            </p>
+            
             {/* 上传按钮 */}
             {isEditing && (
               <div className="flex justify-center">
@@ -267,7 +378,7 @@ export function HobbyFormDetail({
                   "hover:bg-muted/50 transition-colors"
                 )}>
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <ImageIcon className="w-8 h-8 mb-3 text-muted-foreground" />
+                    <Camera className="w-8 h-8 mb-3 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">点击上传照片</p>
                   </div>
                   <input
@@ -319,29 +430,6 @@ export function HobbyFormDetail({
         </Card>
       </motion.div>
 
-      {/* 故事 */}
-      <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-        <Card>
-          <CardHeader className="space-y-1">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <CardTitle>我和它的故事</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <AIRichTextEditor
-              content={formData.description}
-              onChange={(html) => handleInputChange('description', html)}
-              isEditing={isEditing}
-              onAIGenerate={async () => {
-                console.log('AI 生成故事')
-              }}
-            />
-          </CardContent>
-        </Card>
-      </motion.div>
-
-    
       {/* 保存/编辑按钮 */}
       <motion.div 
         variants={item}

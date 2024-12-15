@@ -23,7 +23,8 @@ const mockHobbies: Hobby[] = [
         title: "初级滑雪证书",
         date: "2023-03-01"
       }
-    ]
+    ],
+    customFields: []
   }
 ]
 
@@ -63,7 +64,8 @@ export function HobbyTimeline() {
       description: "",
       createdAt: new Date().toISOString(),
       startDate: "",
-      awards: []
+      awards: [],
+      customFields: []
     }
     setHobbies(prev => [...prev, newHobby])
     setSelectedId(newHobby.id)
@@ -73,7 +75,6 @@ export function HobbyTimeline() {
     setHobbies(prev => 
       prev.map(hobby => hobby.id === selectedId ? updatedHobby : hobby)
     )
-    setSelectedId(null)
   }
 
   if (isLoading) {

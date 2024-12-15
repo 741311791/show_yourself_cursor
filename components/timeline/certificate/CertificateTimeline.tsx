@@ -124,7 +124,8 @@ function CertificateList({
 
                   {/* 内容卡片 */}
                   <Card className={cn(
-                    "flex-1 group-hover:transform group-hover:-translate-y-1 transition-all duration-200",
+                    "flex-1 overflow-hidden",
+                    "group-hover:transform group-hover:-translate-y-1 transition-all duration-200",
                     "group-hover:shadow-md"
                   )}>
                     <CardContent className="p-0">
@@ -164,7 +165,7 @@ function CertificateList({
 
                         {/* 图片部分 */}
                         {certificate.photo ? (
-                          <div className="relative flex-1">
+                          <div className="relative flex-1 border-l border-border">
                             <Image
                               src={certificate.photo}
                               alt={certificate.name}
@@ -175,7 +176,7 @@ function CertificateList({
                             <div className="absolute inset-0 bg-gradient-to-l from-background/20 to-transparent" />
                           </div>
                         ) : (
-                          <div className="relative flex-1 bg-gradient-to-r from-muted to-muted/50" />
+                          <div className="relative flex-1 border-l border-border bg-gradient-to-r from-muted to-muted/50" />
                         )}
                       </div>
                     </CardContent>
@@ -246,7 +247,7 @@ export function CertificateTimeline() {
         
         setCertificates(data.length > 0 ? data : mockCertificates)
       } catch (error) {
-        console.error('获取证书失败:', error)
+        console.error('获取书失败:', error)
         setError('获取证书失败，请刷新页面重试')
         setCertificates(mockCertificates)
       } finally {

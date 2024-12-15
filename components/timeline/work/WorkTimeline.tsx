@@ -128,7 +128,8 @@ function WorkList({
 
                   {/* 内容卡片 */}
                   <Card className={cn(
-                    "flex-1 group-hover:transform group-hover:-translate-y-1 transition-all duration-200",
+                    "flex-1 overflow-hidden",
+                    "group-hover:transform group-hover:-translate-y-1 transition-all duration-200",
                     "group-hover:shadow-md"
                   )}>
                     <CardContent className="p-0">
@@ -168,7 +169,7 @@ function WorkList({
 
                         {/* 图片部分 */}
                         {work.photo ? (
-                          <div className="relative flex-1">
+                          <div className="relative flex-1 border-l border-border">
                             <Image
                               src={work.photo}
                               alt={work.company}
@@ -179,7 +180,7 @@ function WorkList({
                             <div className="absolute inset-0 bg-gradient-to-l from-background/20 to-transparent" />
                           </div>
                         ) : (
-                          <div className="relative flex-1 bg-gradient-to-r from-muted to-muted/50" />
+                          <div className="relative flex-1 border-l border-border bg-gradient-to-r from-muted to-muted/50" />
                         )}
                       </div>
                     </CardContent>

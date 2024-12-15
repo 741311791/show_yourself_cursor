@@ -124,15 +124,12 @@ export function ProfileForm() {
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      // TODO: 调用保存 API
-      // await fetch('/api/profile', {
-      //   method: 'POST',
-      //   body: JSON.stringify(profile)
-      // })
       await new Promise(resolve => setTimeout(resolve, 1000))
       setIsEditing(false)
+      showAlert('success', '保存成功')
     } catch (error) {
       console.error('保存失败:', error)
+      showAlert('error', '保存失败，请重试')
     } finally {
       setIsSaving(false)
     }

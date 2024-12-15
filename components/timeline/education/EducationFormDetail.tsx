@@ -68,10 +68,10 @@ export function EducationFormDetail({
       setIsSaving(true)
       // TODO: 调用更新教育经历 API
       // const response = await updateEducation(formData)
-      await new Promise(resolve => setTimeout(resolve, 1000)) // 模拟 API 调用
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
       onSave(formData)  // 只更新数据
-      setIsEditing(false)  // 切换到不可编辑状态
+      setIsEditing(false)  // 切换到查看模式
       showAlert('success', '保存成功')
     } catch (error) {
       console.error('保存失败:', error)

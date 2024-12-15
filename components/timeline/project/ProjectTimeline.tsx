@@ -37,7 +37,10 @@ const mockProjects: Project[] = [
     achievement: "<p>这是项目中的个人成绩</p>",
     isCore: true,
     order: 0,
-    source: 'custom'
+    source: 'custom',
+    summary: "",
+    photo: null,
+    customFields: []
   }
 ]
 
@@ -178,7 +181,7 @@ function ProjectList({
       <AlertDialog open={!!deleteId} onOpenChange={onDeleteCancel}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>���认删除</AlertDialogTitle>
+            <AlertDialogTitle>认删除</AlertDialogTitle>
             <AlertDialogDescription>
               确定要删除这条项目经历吗？此操作无法撤销。
             </AlertDialogDescription>
@@ -274,7 +277,10 @@ export function ProjectTimeline() {
       achievement: "",
       isCore: false,
       order: projects.length,
-      source: 'custom'
+      source: 'custom',
+      summary: "",
+      photo: null,
+      customFields: []
     }
     setProjects(prev => [...prev, newProject])
     setSelectedId(newProject.id)
@@ -284,7 +290,6 @@ export function ProjectTimeline() {
     setProjects(prev => 
       prev.map(project => project.id === selectedId ? updatedProject : project)
     )
-    setSelectedId(null)
   }
 
   const handleDelete = async (id: string) => {

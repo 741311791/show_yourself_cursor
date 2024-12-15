@@ -1,11 +1,10 @@
 "use client"
 
 import React, { useState, useMemo, useEffect } from "react"
-import { Plus, GraduationCap, MapPin, Calendar, ChevronRight, Pencil, Trash2, Loader2 } from "lucide-react"
+import { Plus, Globe, Calendar, ChevronRight, Pencil, Trash2, Loader2, BookOpen } from "lucide-react"
 import { motion } from "motion/react"
-import { Education } from "@/types/education"
-import { EducationFormDetail } from "../education/EducationFormDetail"
-import Image from "next/image"
+import { Publication } from "@/types/publication"
+import { PublicationFormDetail } from "./PublicationFormDetail"
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -25,24 +24,33 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
-const mockEducations: Education[] = [
+const mockPublications: Publication[] = [
   {
     id: "1",
-    school: "示例大学",
-    location: "北京",
-    startDate: "2019-09",
-    endDate: "2023-06",
-    major: "计算机科学",
-    courses: "数据结构、算法",
-    gpa: "3.8",
-    degree: "学士",
+    name: "示例论文",
+    type: "journal",
+    date: "2023-06",
+    journal: "示例期刊",
+    database: "SCI",
     photo: null,
     customFields: [],
     summary: ""
   }
 ]
 
+interface PublicationListProps {
+  publications: Publication[]
+  onEdit: (id: string) => void
+  onDelete: (id: string) => void
+  isDeleting: boolean
+  deleteId: string | null
+  onDeleteConfirm: (id: string) => Promise<void>
+  onDeleteCancel: () => void
+}
+
+// 动画配置
 const container = {
   hidden: { opacity: 0 },
   show: {
@@ -58,25 +66,15 @@ const item = {
   show: { opacity: 1, y: 0 }
 }
 
-interface EducationListProps {
-  educations: Education[]
-  onEdit: (id: string) => void
-  onDelete: (id: string) => void
-  isDeleting: boolean
-  deleteId: string | null
-  onDeleteConfirm: (id: string) => Promise<void>
-  onDeleteCancel: () => void
-}
-
-function EducationList({
-  educations,
+function PublicationList({
+  publications,
   onEdit,
   onDelete,
   isDeleting,
   deleteId,
   onDeleteConfirm,
   onDeleteCancel
-}: EducationListProps) {
+}: PublicationListProps) {
   return (
     <motion.div 
       className="relative max-w-3xl mx-auto"
@@ -98,17 +96,17 @@ function EducationList({
         transition={{ duration: 1 }}
       />
 
-      {/* 教育经历列表 */}
+      {/* 出版物列表 */}
       <div className="flex flex-col">
-        {educations.map((education, index) => (
-          <React.Fragment key={education.id}>
+        {publications.map((publication, index) => (
+          <React.Fragment key={publication.id}>
             {index > 0 && <div className="h-4" />}
             
             <ContextMenu>
               <ContextMenuTrigger>
                 <motion.div
                   variants={item}
-                  onClick={() => onEdit(education.id)}
+                  onClick={() => onEdit(publication.id)}
                   className="relative flex items-start gap-6 group cursor-pointer"
                 >
                   {/* 时间线节点 */}
@@ -121,12 +119,10 @@ function EducationList({
                       "shadow-primary/20 dark:shadow-primary/40",
                       "relative z-10"
                     )}>
-                      <GraduationCap size={20} className="text-primary-foreground" />
+                      <Globe size={20} className="text-primary-foreground" />
                     </div>
                     {/* 节点到卡片的连接线 */}
-                    {/* 这段代码创建了一个从时间线节点到内容卡片的装饰性连接线 */}
                     <div className="absolute -right-3 top-1/2 w-3 h-[2px] bg-primary" />
-                    
                   </div>
 
                   {/* 内容卡片 */}
@@ -144,7 +140,7 @@ function EducationList({
                               "text-lg font-bold text-foreground",
                               "group-hover:text-primary transition-colors line-clamp-1"
                             )}>
-                              {education.school}
+                              {publication.name}
                             </h3>
                             <ChevronRight 
                               size={18} 
@@ -156,30 +152,26 @@ function EducationList({
                           </div>
                           <div className="space-y-2.5 text-sm">
                             <div className="flex items-center gap-2 text-muted-foreground">
-                              <MapPin size={14} className="text-primary shrink-0" />
-                              <span className="line-clamp-1">{education.location}</span>
+                              <BookOpen size={14} className="text-primary shrink-0" />
+                              <span className="line-clamp-1">{publication.journal}</span>
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground">
                               <Calendar size={14} className="text-primary shrink-0" />
-                              <span>{education.startDate} - {education.endDate}</span>
+                              <span>{publication.date}</span>
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground">
-                              <GraduationCap size={14} className="text-primary shrink-0" />
-                              <div className="flex items-center gap-1 min-w-0">
-                                <span className="font-medium line-clamp-1">{education.major}</span>
-                                <span className="text-muted-foreground/60 shrink-0">·</span>
-                                <span className="line-clamp-1">{education.degree}</span>
-                              </div>
+                              <Globe size={14} className="text-primary shrink-0" />
+                              <span className="font-medium line-clamp-1">{publication.database}</span>
                             </div>
                           </div>
                         </div>
 
                         {/* 图片部分 */}
-                        {education.photo ? (
+                        {publication.photo ? (
                           <div className="relative flex-1 border-l border-border">
                             <Image
-                              src={education.photo}
-                              alt={education.school}
+                              src={publication.photo}
+                              alt={publication.name}
                               fill
                               className="object-cover"
                             />
@@ -195,12 +187,12 @@ function EducationList({
                 </motion.div>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem onClick={() => onEdit(education.id)}>
+                <ContextMenuItem onClick={() => onEdit(publication.id)}>
                   <Pencil className="mr-2 h-4 w-4" />
                   <span>编辑</span>
                 </ContextMenuItem>
                 <ContextMenuItem
-                  onClick={() => onDelete(education.id)}
+                  onClick={() => onDelete(publication.id)}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -213,16 +205,16 @@ function EducationList({
       </div>
 
       {/* 删除确认对话框 */}
-      <AlertDialog open={!!deleteId} onOpenChange={onDeleteCancel}>
+      <AlertDialog open={!!deleteId}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>确认删除</AlertDialogTitle>
             <AlertDialogDescription>
-              确定要删除这条教育经历吗？此操作无法撤销。
+              确定要删除这条出版物吗？此操作无法撤销。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>取消</AlertDialogCancel>
+            <AlertDialogCancel onClick={onDeleteCancel}>取消</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteId && onDeleteConfirm(deleteId)}
               disabled={isDeleting}
@@ -237,90 +229,72 @@ function EducationList({
   )
 }
 
-export function EducationTimeline() {
-  const [educations, setEducations] = useState<Education[]>([])
+export function PublicationTimeline() {
+  const [publications, setPublications] = useState<Publication[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // 获取教育经历列表
+  // 获取出版物列表
   useEffect(() => {
-    const fetchEducations = async () => {
+    const fetchPublications = async () => {
       try {
         setIsLoading(true)
         setError(null)
         
-        // TODO: 替换为实际的 API 调用
-        // const response = await fetch('/api/educations')
-        // const data = await response.json()
-        
-        // 模拟 API 调用
         await new Promise(resolve => setTimeout(resolve, 1000))
-        const data: Education[] = []
-
-        // 如果返回的数据为空，使用 mock 数据
-        setEducations(data.length > 0 ? data : mockEducations)
+        const data: Publication[] = []
+        setPublications(data.length > 0 ? data : mockPublications)
       } catch (error) {
-        console.error('获取教育经历失败:', error)
-        setError('获取教育经历失败，请刷新页面重试')
-        // 发生错误时也使用 mock 数据
-        setEducations(mockEducations)
+        console.error('获取出版物失败:', error)
+        setError('获取出版物失败，请刷新页面重试')
+        setPublications(mockPublications)
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchEducations()
+    fetchPublications()
   }, [])
 
-  // 根据开始时间排序的教育经历
-  const sortedEducations = useMemo(() => {
-    return [...educations].sort((a, b) => {
-      if (!a.startDate) return 1
-      if (!b.startDate) return -1
-      return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+  // 根据时间排序的出版物
+  const sortedPublications = useMemo(() => {
+    return [...publications].sort((a, b) => {
+      if (!a.date) return 1
+      if (!b.date) return -1
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
     })
-  }, [educations])
+  }, [publications])
 
-  const handleAddEducation = () => {
-    const newEducation: Education = {
+  const handleAddPublication = () => {
+    const newPublication: Publication = {
       id: Math.random().toString(),
-      school: "",
-      location: "",
-      startDate: "",
-      endDate: "",
-      major: "",
-      courses: "",
-      gpa: "",
-      degree: "",
+      name: "",
+      type: "journal",
+      date: "",
+      journal: "",
+      database: "",
       photo: null,
       customFields: [],
       summary: ""
     }
-    setEducations(prev => [...prev, newEducation])
-    setSelectedId(newEducation.id)
+    setPublications(prev => [...prev, newPublication])
+    setSelectedId(newPublication.id)
   }
 
-  const handleSaveEducation = (updatedEducation: Education) => {
-    setEducations(prev => 
-      prev.map(edu => edu.id === selectedId ? updatedEducation : edu)
+  const handleSavePublication = (updatedPublication: Publication) => {
+    setPublications(prev => 
+      prev.map(publication => publication.id === selectedId ? updatedPublication : publication)
     )
-  }
-
-  const handleReturn = () => {
-    setSelectedId(null)
   }
 
   const handleDelete = async (id: string) => {
     try {
       setIsDeleting(true)
-      // TODO: 调用删除教育经历 API
-      await new Promise(resolve => setTimeout(resolve, 1000)) // 模拟 API 调用
-      
-      // TODO: 重新获取教育经历列表
-      setEducations(prev => prev.filter(edu => edu.id !== id))
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setPublications(prev => prev.filter(publication => publication.id !== id))
       setDeleteId(null)
     } catch (error) {
       console.error('删除失败:', error)
@@ -329,27 +303,25 @@ export function EducationTimeline() {
     }
   }
 
-  // 如果正在加载，显示加载状态
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">加载教育经历...</p>
+          <p className="text-sm text-muted-foreground">加载出版物...</p>
         </div>
       </div>
     )
   }
 
-  // 如果有错误但使用了 mock 数据，显示错误提示
   if (error) {
     return (
       <div className="space-y-6">
         <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
           {error}
         </div>
-        <EducationList 
-          educations={sortedEducations}
+        <PublicationList 
+          publications={sortedPublications}
           onEdit={setSelectedId}
           onDelete={setDeleteId}
           isDeleting={isDeleting}
@@ -362,22 +334,22 @@ export function EducationTimeline() {
   }
 
   if (selectedId) {
-    const education = educations.find(edu => edu.id === selectedId)
-    if (!education) return null
+    const publication = publications.find(p => p.id === selectedId)
+    if (!publication) return null
 
     return (
-      <EducationFormDetail
-        education={education}
-        onSave={handleSaveEducation}
-        onCancel={handleReturn}
+      <PublicationFormDetail
+        publication={publication}
+        onSave={handleSavePublication}
+        onCancel={() => setSelectedId(null)}
       />
     )
   }
 
   return (
     <>
-      <EducationList 
-        educations={sortedEducations}
+      <PublicationList 
+        publications={sortedPublications}
         onEdit={setSelectedId}
         onDelete={setDeleteId}
         isDeleting={isDeleting}
@@ -392,7 +364,7 @@ export function EducationTimeline() {
         variants={item}
       >
         <Button
-          onClick={handleAddEducation}
+          onClick={handleAddPublication}
           className={cn(
             "gap-2 bg-gradient-to-r from-primary to-primary/80",
             "hover:shadow-lg hover:shadow-primary/20",
@@ -402,9 +374,9 @@ export function EducationTimeline() {
           )}
         >
           <Plus className="h-4 w-4" />
-          添加教育经历
+          添加出版物
         </Button>
       </motion.div>
     </>
   )
-} 
+}
