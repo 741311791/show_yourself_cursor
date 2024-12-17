@@ -1,3 +1,4 @@
+import { CustomField } from "./shared"  // 导入共享类型
 export interface Project {
   id: string
   name: string
@@ -19,10 +20,6 @@ export interface Work {
   position: string
   photo: string | null
   projects: Project[]
-  customFields: {
-    id: string
-    title: string
-    content: string
-  }[]
+  customFields: CustomField[]
   summary: string
 } 

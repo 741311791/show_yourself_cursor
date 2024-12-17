@@ -1,25 +1,32 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from "next/link"
 import { 
   FileText, History, HelpCircle, MessageSquare, 
   ChevronDown, User, GraduationCap, Briefcase,
   Folder, Heart, Languages, Award, Medal,
-  BookOpen, BookMarked, Plus, Globe, Code
+  BookOpen, BookMarked, Plus, Globe, Code,
+  Pencil, Trash2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 import { UserSettings } from "./UserSettings"
 import { motion } from "motion/react"
 import { usePathname } from 'next/navigation'
+import { CustomBlockDialog } from "@/components/timeline/custom/CustomBlockDialog"
+import { useCustomBlockStore } from '@/store/customBlock'
+import { CustomBlock } from "@/types/custom"
 
 interface SubMenuItem {
   icon: typeof FileText
   label: string
   href: string
+  isCustomBlock?: boolean
+  blockId?: string
+  onEdit?: () => void
+  onDelete?: () => void
 }
 
 interface MenuItem {
@@ -35,7 +42,7 @@ const timelineMenuItems: MenuItem[] = [
     label: "简历配置",
     href: "/timeline",
     subItems: [
-      { icon: User, label: "个人资料", href: "/timeline/profile" },
+      { icon: User, label: "个人信息", href: "/timeline/profile" },
       { icon: GraduationCap, label: "教育经历", href: "/timeline/education" },
       { icon: Briefcase, label: "工作经历", href: "/timeline/work" },
       { icon: Folder, label: "项目经历", href: "/timeline/project" },
@@ -46,7 +53,12 @@ const timelineMenuItems: MenuItem[] = [
       { icon: Medal, label: "获奖", href: "/timeline/awards" },
       { icon: BookOpen, label: "证书", href: "/timeline/certificates" },
       { icon: Globe, label: "出版物", href: "/timeline/publications" },
-      { icon: Plus, label: "新增自定义块", href: "/timeline/custom" },
+      { 
+        icon: Plus, 
+        label: "新增自定义块", 
+        href: "/timeline/custom",
+        isCustomBlock: true  // 标记为自定义块菜单
+      },
     ]
   }
 ]
@@ -62,17 +74,16 @@ const resumeMenuItems: MenuItem[] = [
   }
 ]
 
-// 添加激活状态样式的工具函数
-const isActiveRoute = (href: string) => {
+// 将函数改为自定义 hook
+const useActiveRoute = () => {
   const pathname = usePathname()
   
-  // 精确匹配路径
-  if (href === '/') {
-    return pathname === href
+  return (href: string) => {
+    if (href === '/') {
+      return pathname === href
+    }
+    return pathname === href || pathname.startsWith(`${href}/`)
   }
-  
-  // 对于其他路径，确保完全匹配或者是子路径
-  return pathname === href || pathname.startsWith(`${href}/`)
 }
 
 // 定义动画变体
@@ -121,7 +132,43 @@ const chevronVariants = {
   }
 }
 
+const useCustomBlocks = () => {
+  const blocks = useCustomBlockStore(state => state.blocks)
+  const removeBlock = useCustomBlockStore(state => state.removeBlock)
+  const updateBlock = useCustomBlockStore(state => state.updateBlock)
+
+  return {
+    customMenuItems: blocks.map(block => ({
+      icon: FileText,
+      label: block.name,
+      href: `/timeline/custom/${block.route}`,
+      isCustomBlock: true,
+      blockId: block.id,
+      onEdit: () => {
+        updateBlock(block.id, {
+          name: block.name,
+          // ... 其他需要更新的属性
+        })
+      },
+      onDelete: async () => {
+        if (confirm('确定要删除此自定义块吗？')) {
+          try {
+            // TODO: 调用删除API
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            removeBlock(block.id)
+          } catch (error) {
+            console.error('删除失败:', error)
+          }
+        }
+      }
+    }))
+  }
+}
+
 export function Sidebar() {
+  const addBlock = useCustomBlockStore(state => state.addBlock)
+  const isActiveRoute = useActiveRoute()
+
   const [openMenus, setOpenMenus] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebarOpenMenus')
@@ -142,6 +189,22 @@ export function Sidebar() {
       return newState
     })
   }
+
+  const [customBlockDialogOpen, setCustomBlockDialogOpen] = useState(false)
+
+  const { customMenuItems } = useCustomBlocks()
+
+  const allTimelineMenuItems = useMemo(() => {
+    const baseItems = timelineMenuItems[0].subItems || []
+    return [{
+      ...timelineMenuItems[0],
+      subItems: [
+        ...baseItems.slice(0, -1),
+        ...customMenuItems,
+        baseItems[baseItems.length - 1] // 保持"新增自定义块"在最后
+      ]
+    }]
+  }, [customMenuItems])
 
   const renderMenuItem = (item: MenuItem) => {
     const isOpen = openMenus.includes(item.label)
@@ -180,37 +243,112 @@ export function Sidebar() {
             {item.subItems.map(subItem => {
               const isActive = isActiveRoute(subItem.href)
               return (
-                <motion.div
-                  key={subItem.href}
-                  initial={false}
-                  whileHover={isActive ? "active" : "hover"}
-                  animate={isActive ? "active" : "initial"}
-                  variants={menuItemVariants}
-                  className="rounded-md overflow-hidden"
-                >
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-3"
-                    asChild
-                  >
-                    <Link href={subItem.href}>
-                      <motion.div 
-                        initial={false}
-                        variants={iconVariants}
-                        animate={isActive ? { color: "hsl(var(--primary))" } : {}}
+                <div key={subItem.href} className="group relative">
+                  {subItem.isCustomBlock && !subItem.blockId ? (
+                    <motion.div
+                      initial="initial"
+                      whileHover="hover"
+                      animate={isActive ? "active" : "initial"}
+                      variants={menuItemVariants}
+                      className="rounded-md overflow-hidden"
+                    >
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start gap-3"
+                        onClick={() => setCustomBlockDialogOpen(true)}
                       >
-                        <subItem.icon className="h-4 w-4" />
-                      </motion.div>
-                      <motion.span 
-                        initial={false}
-                        variants={labelVariants}
-                        animate={isActive ? { fontWeight: 500 } : {}}
+                        <motion.div variants={iconVariants}>
+                          <subItem.icon className="h-4 w-4" />
+                        </motion.div>
+                        <motion.span variants={labelVariants}>
+                          {subItem.label}
+                        </motion.span>
+                      </Button>
+                    </motion.div>
+                  ) : subItem.isCustomBlock && subItem.blockId ? (
+                    <motion.div
+                      initial="initial"
+                      whileHover="hover"
+                      animate={isActive ? "active" : "initial"}
+                      variants={menuItemVariants}
+                      className="rounded-md overflow-hidden"
+                    >
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start gap-3"
+                        asChild
                       >
-                        {subItem.label}
-                      </motion.span>
-                    </Link>
-                  </Button>
-                </motion.div>
+                        <Link href={subItem.href}>
+                          <motion.div 
+                            initial={false}
+                            variants={iconVariants}
+                            animate={isActive ? { color: "hsl(var(--primary))" } : {}}
+                          >
+                            <subItem.icon className="h-4 w-4" />
+                          </motion.div>
+                          <motion.span 
+                            initial={false}
+                            variants={labelVariants}
+                            animate={isActive ? { fontWeight: 500 } : {}}
+                          >
+                            {subItem.label}
+                          </motion.span>
+                        </Link>
+                      </Button>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            subItem.onEdit?.()
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            subItem.onDelete?.()
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial="initial"
+                      whileHover="hover"
+                      animate={isActive ? "active" : "initial"}
+                      variants={menuItemVariants}
+                      className="rounded-md overflow-hidden"
+                    >
+                      <Button variant="ghost" className="w-full justify-start gap-3" asChild>
+                        <Link href={subItem.href}>
+                          <motion.div 
+                            initial={false}
+                            variants={iconVariants}
+                            animate={isActive ? { color: "hsl(var(--primary))" } : {}}
+                          >
+                            <subItem.icon className="h-4 w-4" />
+                          </motion.div>
+                          <motion.span 
+                            initial={false}
+                            variants={labelVariants}
+                            animate={isActive ? { fontWeight: 500 } : {}}
+                          >
+                            {subItem.label}
+                          </motion.span>
+                        </Link>
+                      </Button>
+                    </motion.div>
+                  )}
+                </div>
               )
             })}
           </div>
@@ -254,7 +392,7 @@ export function Sidebar() {
             <p className="text-xs font-medium text-muted-foreground px-4 mb-2">
               简历管理
             </p>
-            {timelineMenuItems.map(renderMenuItem)}
+            {allTimelineMenuItems.map(renderMenuItem)}
             {resumeMenuItems.map(renderMenuItem)}
           </div>
 
@@ -303,6 +441,43 @@ export function Sidebar() {
       <div className="flex-none p-4 border-t border-border/40 bg-muted/90">
         <UserSettings />
       </div>
+
+      <CustomBlockDialog
+        open={customBlockDialogOpen}
+        onOpenChange={setCustomBlockDialogOpen}
+        onConfirm={async (data) => {
+          try {
+            // TODO: 调用新增自定义块API
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            
+            // 生成新的自定义块
+            const newBlock: CustomBlock = {
+              id: Math.random().toString(),
+              name: data.name,
+              route: data.route,
+              type: data.type,
+              fields: data.fields,
+              icon: data.icon || 'FileText',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+            
+            // 加到store中
+            addBlock(newBlock)
+            
+            // 关闭对话框
+            setCustomBlockDialogOpen(false)
+            
+            // 可选：显示成功提示
+            // toast.success('创建成功')
+            
+          } catch (error) {
+            console.error('新增失败:', error)
+            // 可选：显示错误提示
+            // toast.error('创建失败，请重试')
+          }
+        }}
+      />
     </div>
   )
 } 

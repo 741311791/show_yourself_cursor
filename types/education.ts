@@ -1,3 +1,5 @@
+import { CustomField } from "./shared"  // 导入共享类型
+
 export interface Education {
   id: string
   school: string
@@ -9,10 +11,6 @@ export interface Education {
   gpa: string
   degree: string
   photo: string | null
-  customFields: {
-    id: string
-    title: string
-    content: string
-  }[]
+  customFields: CustomField[]
   summary: string
 } 

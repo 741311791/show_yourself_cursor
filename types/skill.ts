@@ -1,8 +1,4 @@
-interface CustomField {
-  id: string
-  title: string
-  content: string
-}
+import { CustomField } from "./shared"  // 导入共享类型
 
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert'
 export type SkillCategory = 'language' | 'programming' | 'design' | 'business' | 'other'

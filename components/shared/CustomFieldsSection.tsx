@@ -6,28 +6,35 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-
-interface CustomField {
-  id: string
-  title: string
-  content: string
-}
+import { CustomField } from "@/types/shared"
 
 interface CustomFieldsSectionProps {
   fields: CustomField[]
-  isEditing: boolean
-  onAdd: () => void
-  onRemove: (id: string) => void
-  onUpdate: (id: string, field: 'title' | 'content', value: string) => void
+  onFieldsChange?: (fields: CustomField[]) => void
+  disabled?: boolean
+  isEditing?: boolean
+  onAdd?: () => void
+  onRemove?: (id: string) => void
+  onUpdate?: (id: string, field: 'title' | 'content', value: string) => void
 }
 
 export function CustomFieldsSection({
   fields,
+  onFieldsChange,
+  disabled,
   isEditing,
   onAdd,
   onRemove,
   onUpdate
 }: CustomFieldsSectionProps) {
+  const handleFieldsChange = (newFields: CustomField[]) => {
+    if (onFieldsChange) {
+      onFieldsChange(newFields)
+    }
+  }
+
+  const isEditingMode = isEditing ?? !disabled
+
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between pb-2">
@@ -35,11 +42,17 @@ export function CustomFieldsSection({
           <FileText className="h-5 w-5 text-primary" />
           <h2 className="text-xl font-semibold">自定义信息</h2>
         </div>
-        {isEditing && (
+        {isEditingMode && (
           <Button
             variant="outline"
             size="sm"
-            onClick={onAdd}
+            onClick={() => {
+              if (onAdd) {
+                onAdd()
+              } else if (onFieldsChange) {
+                handleFieldsChange(fields.concat({ id: Math.random().toString(), title: '', content: '' }))
+              }
+            }}
             className={cn(
               "gap-2",
               "text-muted-foreground hover:text-foreground",
@@ -57,24 +70,46 @@ export function CustomFieldsSection({
             <div className="w-[25%]">
               <Input
                 value={field.title}
-                onChange={(e) => onUpdate(field.id, 'title', e.target.value)}
+                onChange={(e) => {
+                  if (onUpdate) {
+                    onUpdate(field.id, 'title', e.target.value)
+                  } else if (onFieldsChange) {
+                    handleFieldsChange(fields.map(f => 
+                      f.id === field.id ? { ...f, title: e.target.value } : f
+                    ))
+                  }
+                }}
                 placeholder="标题"
-                disabled={!isEditing}
+                disabled={!isEditingMode}
               />
             </div>
             <div className="flex-1">
               <Input
                 value={field.content}
-                onChange={(e) => onUpdate(field.id, 'content', e.target.value)}
+                onChange={(e) => {
+                  if (onUpdate) {
+                    onUpdate(field.id, 'content', e.target.value)
+                  } else if (onFieldsChange) {
+                    handleFieldsChange(fields.map(f => 
+                      f.id === field.id ? { ...f, content: e.target.value } : f
+                    ))
+                  }
+                }}
                 placeholder="内容"
-                disabled={!isEditing}
+                disabled={!isEditingMode}
               />
             </div>
-            {isEditing && (
+            {isEditingMode && (
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onRemove(field.id)}
+                onClick={() => {
+                  if (onRemove) {
+                    onRemove(field.id)
+                  } else if (onFieldsChange) {
+                    handleFieldsChange(fields.filter(f => f.id !== field.id))
+                  }
+                }}
                 className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <Trash2 className="h-4 w-4" />
@@ -82,7 +117,7 @@ export function CustomFieldsSection({
             )}
           </div>
         ))}
-        {fields.length === 0 && isEditing && (
+        {fields.length === 0 && isEditingMode && (
           <div className="text-center py-8 text-muted-foreground">
             <p>点击上方按钮添加自定义信息</p>
           </div>

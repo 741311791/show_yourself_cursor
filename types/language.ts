@@ -1,3 +1,5 @@
+import { CustomField } from "./shared"  // 导入共享类型
+
 export interface Language {
   id: string
   name: string // 语种名称
@@ -7,10 +9,6 @@ export interface Language {
   photo: string | null // 证书图片
   score: string // 分数
   validPeriod: string // 有效期
-  customFields: {
-    id: string
-    title: string
-    content: string
-  }[]
+  customFields: CustomField[]
   summary: string // 语言学习总结
 } 

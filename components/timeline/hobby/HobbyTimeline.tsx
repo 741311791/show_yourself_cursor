@@ -1,12 +1,13 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { motion } from "motion/react"
-import { Plus, Loader2 } from "lucide-react"
+import React, { useState, useMemo, useEffect } from "react"
+import { Plus, Heart, Calendar, Trophy, Loader2 } from "lucide-react"
+import { motion } from "framer-motion"
 import { Hobby } from "@/types/hobby"
-import { HobbyFormDetail } from "@/components/timeline/hobby/HobbyFormDetail"
+import { HobbyFormDetail } from "./HobbyFormDetail"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import Image from "next/image"
+import { TimelineList, type TimelineItem } from "../shared/TimelineList"
 
 const mockHobbies: Hobby[] = [
   {
@@ -31,6 +32,8 @@ const mockHobbies: Hobby[] = [
 export function HobbyTimeline() {
   const [hobbies, setHobbies] = useState<Hobby[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -39,7 +42,6 @@ export function HobbyTimeline() {
       try {
         setIsLoading(true)
         setError(null)
-        
         await new Promise(resolve => setTimeout(resolve, 1000))
         const data: Hobby[] = []
         setHobbies(data.length > 0 ? data : mockHobbies)
@@ -54,6 +56,14 @@ export function HobbyTimeline() {
 
     fetchHobbies()
   }, [])
+
+  const sortedHobbies = useMemo(() => {
+    return [...hobbies].sort((a, b) => {
+      if (!a.startDate) return 1
+      if (!b.startDate) return -1
+      return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+    })
+  }, [hobbies])
 
   const handleAddHobby = () => {
     const newHobby: Hobby = {
@@ -77,6 +87,42 @@ export function HobbyTimeline() {
     )
   }
 
+  const handleDelete = async (id: string) => {
+    try {
+      setIsDeleting(true)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setHobbies(prev => prev.filter(hobby => hobby.id !== id))
+      setDeleteId(null)
+    } catch (error) {
+      console.error('删除失败:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const timelineItems: TimelineItem[] = useMemo(() => {
+    return sortedHobbies.map(hobby => ({
+      id: hobby.id,
+      title: hobby.name,
+      cover: hobby.cover,
+      details: [
+        {
+          icon: Calendar,
+          content: <span>开始于 {hobby.startDate}</span>
+        },
+        ...(hobby.awards && hobby.awards.length > 0 ? [{
+          icon: Trophy,
+          content: (
+            <span className="line-clamp-1">
+              {hobby.awards[0].title}
+              {hobby.awards.length > 1 && ` 等${hobby.awards.length}个荣誉`}
+            </span>
+          )
+        }] : [])
+      ]
+    }))
+  }, [sortedHobbies])
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
@@ -94,34 +140,18 @@ export function HobbyTimeline() {
         <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
           {error}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {hobbies.map((hobby) => (
-            <motion.div
-              key={hobby.id}
-              onClick={() => setSelectedId(hobby.id)}
-              className={cn(
-                "relative aspect-square rounded-lg overflow-hidden cursor-pointer group",
-                "hover:shadow-lg transition-shadow"
-              )}
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              {hobby.cover ? (
-                <Image
-                  src={hobby.cover}
-                  alt={hobby.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 bg-muted" />
-              )}
-              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                <h3 className="text-2xl font-bold text-white">{hobby.name}</h3>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <TimelineList 
+          items={timelineItems}
+          icon={Heart}
+          onEdit={setSelectedId}
+          onDelete={setDeleteId}
+          isDeleting={isDeleting}
+          deleteId={deleteId}
+          onDeleteConfirm={handleDelete}
+          onDeleteCancel={() => setDeleteId(null)}
+          deleteDialogTitle="确认删除"
+          deleteDialogDescription="确定要删除这条兴趣爱好吗？此操作无法撤销。"
+        />
       </div>
     )
   }
@@ -140,47 +170,40 @@ export function HobbyTimeline() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {hobbies.map((hobby) => (
-        <motion.div
-          key={hobby.id}
-          onClick={() => setSelectedId(hobby.id)}
-          className={cn(
-            "relative aspect-square rounded-lg overflow-hidden cursor-pointer group",
-            "hover:shadow-lg transition-shadow"
-          )}
-          whileHover={{ scale: 1.02 }}
-          transition={{ duration: 0.2 }}
-        >
-          {hobby.cover ? (
-            <Image
-              src={hobby.cover}
-              alt={hobby.name}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-muted" />
-          )}
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-            <h3 className="text-2xl font-bold text-white">{hobby.name}</h3>
-          </div>
-        </motion.div>
-      ))}
-
-      {/* 添加按钮卡片 */}
-      <motion.div
-        onClick={handleAddHobby}
-        className={cn(
-          "relative aspect-square rounded-lg cursor-pointer",
-          "bg-muted hover:bg-muted/80 transition-colors",
-          "flex items-center justify-center"
-        )}
-        whileHover={{ scale: 1.02 }}
-        transition={{ duration: 0.2 }}
+    <>
+      <TimelineList 
+        items={timelineItems}
+        icon={Heart}
+        onEdit={setSelectedId}
+        onDelete={setDeleteId}
+        isDeleting={isDeleting}
+        deleteId={deleteId}
+        onDeleteConfirm={handleDelete}
+        onDeleteCancel={() => setDeleteId(null)}
+        deleteDialogTitle="确认删除"
+        deleteDialogDescription="确定要删除这条兴趣爱好吗？此操作无法撤销。"
+      />
+      
+      {/* 添加按钮 */}
+      <motion.div 
+        className="mt-16 text-center" 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
       >
-        <Plus className="w-8 h-8 text-muted-foreground" />
+        <Button
+          onClick={handleAddHobby}
+          className={cn(
+            "gap-2 bg-gradient-to-r from-primary to-primary/80",
+            "hover:shadow-lg hover:shadow-primary/20",
+            "dark:from-primary/90 dark:to-primary/70",
+            "dark:hover:shadow-primary/40",
+            "transform hover:-translate-y-0.5 transition-all"
+          )}
+        >
+          <Plus className="h-4 w-4" />
+          添加兴趣爱好
+        </Button>
       </motion.div>
-    </div>
+    </>
   )
 } 

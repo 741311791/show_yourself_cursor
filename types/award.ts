@@ -1,3 +1,4 @@
+import { CustomField } from "./shared"  // 导入共享类型
 export interface Award {
   id: string
   name: string // 奖项名称
@@ -7,10 +8,6 @@ export interface Award {
   photo: string | null // 证书图片
   ranking: string // 排名/名次
   participants: string // 参与人数
-  customFields: {
-    id: string
-    title: string
-    content: string
-  }[]
+  customFields: CustomField[]
   summary: string // 获奖总结
 } 

@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Alert } from "@/components/shared/Alert"
+import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
 
 const container = {
   hidden: { opacity: 0 },
@@ -57,7 +58,10 @@ export function CertificateFormDetail({
     message: ''
   })
 
-  const handleInputChange = (field: keyof Certificate, value: string) => {
+  const handleInputChange = (
+    field: keyof Certificate, 
+    value: string | Array<{ id: string; title: string; content: string }>
+  ) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -87,6 +91,35 @@ export function CertificateFormDetail({
     setTimeout(() => {
       setAlertState(prev => ({ ...prev, show: false }))
     }, 3000)
+  }
+
+  
+  const addCustomField = () => {
+    const newField = {
+      id: Math.random().toString(),
+      title: '',
+      content: ''
+    }
+    setFormData(prev => ({
+      ...prev,
+      customFields: [...prev.customFields, newField]
+    }))
+  }
+
+  const removeCustomField = (id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customFields: prev.customFields.filter(field => field.id !== id)
+    }))
+  }
+
+  const updateCustomField = (id: string, field: 'title' | 'content', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      customFields: prev.customFields.map(item => 
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    }))
   }
 
   return (
@@ -178,6 +211,16 @@ export function CertificateFormDetail({
         </Card>
       </motion.div>
 
+      {/* 自定义信息 */}
+      <motion.div variants={item}>
+        <CustomFieldsSection
+          fields={formData.customFields}
+          isEditing={isEditing}
+          onAdd={addCustomField}
+          onRemove={removeCustomField}
+          onUpdate={updateCustomField}
+        />
+      </motion.div>
       {/* 证书图片 */}
       <motion.div variants={item}>
         <Card>

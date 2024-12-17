@@ -1,13 +1,9 @@
+import { CustomField } from "./shared"  // 导入共享类型
+
 export interface HobbyAward {
   id: string
   title: string
   date: string
-}
-
-interface CustomField {
-  id: string
-  title: string
-  content: string
 }
 
 export interface Hobby {

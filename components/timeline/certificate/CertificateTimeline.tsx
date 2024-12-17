@@ -35,7 +35,8 @@ const mockCertificates: Certificate[] = [
     level: "高级",
     number: "CERT2023001",
     photo: null,
-    summary: ""
+    summary: "",
+    customFields: []
   }
 ]
 
@@ -94,7 +95,7 @@ function CertificateList({
         transition={{ duration: 1 }}
       />
 
-      {/* 证书列表 */}
+      {/* 证书���表 */}
       <div className="flex flex-col">
         {certificates.map((certificate, index) => (
           <React.Fragment key={certificate.id}>
@@ -276,7 +277,8 @@ export function CertificateTimeline() {
       level: "",
       number: "",
       photo: null,
-      summary: ""
+      summary: "",
+      customFields: []
     }
     setCertificates(prev => [...prev, newCertificate])
     setSelectedId(newCertificate.id)
