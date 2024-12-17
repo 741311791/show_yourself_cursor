@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { Alert } from "@/components/shared/Alert"
+import { Profile } from "@/types/profile"
 
 // 动画配置
 const container = {
@@ -38,28 +39,18 @@ interface CustomField {
   content: string
 }
 
-interface Profile {
-  avatar: string
-  name: string
-  email: string
-  phone: string
-  birthday: string
-  address: string
-  website: string
-  customFields: CustomField[]
-  summary: string
-}
-
 const mockProfile: Profile = {
-  avatar: "",
+  id: "1",
   name: "示例用户",
   email: "example@email.com",
   phone: "13800138000",
   birthday: "1990-01-01",
-  address: "北京市",
+  location: "北京市",
+  title: "前端开发工程师",
   website: "https://example.com",
   customFields: [],
-  summary: "这是一段示例的个人简介..."
+  summary: "这是一段示例的个人简介...",
+  avatar: ""
 }
 
 export function ProfileForm() {
@@ -79,15 +70,17 @@ export function ProfileForm() {
   
   // 表单数据状态
   const [profile, setProfile] = useState<Profile>({
-    avatar: "",
+    id: "",
     name: "",
     email: "",
     phone: "",
     birthday: "",
-    address: "",
+    location: "",
+    title: "",
     website: "",
     customFields: [],
-    summary: ""
+    summary: "",
+    avatar: ""
   })
 
   // 获取个人信息
@@ -285,8 +278,8 @@ export function ProfileForm() {
                 </Label>
                 <Input
                   type="text"
-                  value={profile.address}
-                  onChange={(e) => setProfile(prev => ({ ...prev, address: e.target.value }))}
+                  value={profile.location}
+                  onChange={(e) => setProfile(prev => ({ ...prev, location: e.target.value }))}
                   disabled={!isEditing}
                   placeholder="请输入地址"
                 />
