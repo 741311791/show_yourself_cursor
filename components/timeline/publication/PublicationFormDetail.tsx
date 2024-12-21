@@ -29,7 +29,7 @@ const publicationTypes = [
   { value: 'conference', label: '会议论文' },
   { value: 'book', label: '专著' },
   { value: 'patent', label: '专利' },
-  { value: 'other', label: '其它' }
+  { value: 'other', label: '其���' }
 ]
 
 interface PublicationFormDetailProps {
@@ -84,7 +84,8 @@ export function PublicationFormDetail({
     const newField = {
       id: Math.random().toString(),
       title: '',
-      content: ''
+      content: '',
+      icon: 'FileText'
     }
     setFormData(prev => ({
       ...prev,
@@ -99,7 +100,7 @@ export function PublicationFormDetail({
     }))
   }
 
-  const updateCustomField = (id: string, field: 'title' | 'content', value: string) => {
+  const updateCustomField = (id: string, field: 'title' | 'content' | 'icon', value: string) => {
     setFormData(prev => ({
       ...prev,
       customFields: prev.customFields.map(item => 
@@ -213,7 +214,7 @@ export function PublicationFormDetail({
               <div className="col-span-2 space-y-2">
                 <Label className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4 text-muted-foreground" />
-                  刊物名称
+                  ��物名称
                 </Label>
                 <Input
                   value={formData.journal}

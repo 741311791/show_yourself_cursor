@@ -59,7 +59,8 @@ export function SkillWorkItem({
     const newField = {
       id: Math.random().toString(),
       title: '',
-      content: ''
+      content: '',
+      icon: 'FileText'
     }
     onUpdate({
       ...work,
@@ -74,7 +75,7 @@ export function SkillWorkItem({
     })
   }
 
-  const updateCustomField = (id: string, field: 'title' | 'content', value: string) => {
+  const updateCustomField = (id: string, field: 'title' | 'content' | 'icon', value: string) => {
     onUpdate({
       ...work,
       customFields: work.customFields.map(item => 

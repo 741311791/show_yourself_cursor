@@ -160,7 +160,8 @@ export function CustomBlockFormDetail({
             const newField = {
               id: Math.random().toString(),
               title: '',
-              content: ''
+              content: '',
+              icon: 'FileText'
             }
             setFormData(prev => ({
               ...prev,

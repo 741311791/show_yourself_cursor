@@ -1,3 +1,5 @@
+import { CustomField } from "./shared"  // 导入共享类型
+
 export type CustomBlockType = 'page' | 'timeline'
 
 export interface CustomBlockField {
@@ -22,11 +24,7 @@ export interface CustomBlockItem {
   id: string
   blockId: string      // 关联的自定义块ID
   fields: Record<string, string> // 字段值
-  customFields: Array<{
-    id: string
-    title: string
-    content: string
-  }>
+  customFields: CustomField[]
   summary: string
   photos: string[]
   createdAt: string

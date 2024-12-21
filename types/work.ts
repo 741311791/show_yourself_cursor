@@ -5,10 +5,11 @@ export interface Project {
   startDate: string
   endDate: string
   description: string
-  techStack?: string
+  techStack: string
   achievement: string
   isCore: boolean
   order: number
+  customFields: CustomField[]
 }
 
 export interface Work {

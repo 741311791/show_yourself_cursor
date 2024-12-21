@@ -20,7 +20,7 @@ import {
 import { 
   Briefcase, MapPin, Calendar,
   FileText, Save, Edit2,
-  Camera, Plus, Trash2
+  Camera, Plus
 } from "lucide-react"
 import { Work, Project } from "@/types/work"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
@@ -32,6 +32,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { Alert } from "@/components/shared/Alert"
+import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
+import { CustomField } from "@/types/shared"
 
 const container = {
   hidden: { opacity: 0 },
@@ -98,35 +100,6 @@ export function WorkFormDetail({
     setIsEditing(true)
   }
 
-  // 自定义字段相关处理函数
-  const addCustomField = () => {
-    const newField = {
-      id: Math.random().toString(),
-      title: '',
-      content: ''
-    }
-    setFormData(prev => ({
-      ...prev,
-      customFields: [...prev.customFields, newField]
-    }))
-  }
-
-  const removeCustomField = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      customFields: prev.customFields.filter(field => field.id !== id)
-    }))
-  }
-
-  const updateCustomField = (id: string, field: 'title' | 'content', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      customFields: prev.customFields.map(item => 
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    }))
-  }
-
   // 项目相关处理函数
   const addProject = () => {
     const newProject: Project = {
@@ -138,7 +111,8 @@ export function WorkFormDetail({
       techStack: "",
       achievement: "",
       isCore: false,
-      order: formData.projects.length
+      order: formData.projects.length,
+      customFields: []
     }
     setFormData(prev => ({
       ...prev,
@@ -146,7 +120,7 @@ export function WorkFormDetail({
     }))
   }
 
-  const updateProject = (id: string, field: keyof Project, value: string | boolean) => {
+  const updateProject = (id: string, field: keyof Project, value: string | boolean | CustomField[]) => {
     setFormData(prev => ({
       ...prev,
       projects: prev.projects.map(project => 
@@ -301,66 +275,38 @@ export function WorkFormDetail({
 
       {/* 自定义信息 */}
       <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold">自定义信息</h2>
-            </div>
-            {isEditing && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addCustomField}
-                className={cn(
-                  "gap-2",
-                  "text-muted-foreground hover:text-foreground",
-                  "border-dashed border-muted-foreground/50"
-                )}
-              >
-                <Plus className="h-4 w-4" />
-                添加自定义字段
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {formData.customFields.map(field => (
-              <div key={field.id} className="flex items-start gap-3 group">
-                <div className="w-[25%]">
-                  <Input
-                    value={field.title}
-                    onChange={(e) => updateCustomField(field.id, 'title', e.target.value)}
-                    placeholder="标题"
-                    disabled={!isEditing}
-                  />
-                </div>
-                <div className="flex-1">
-                  <Input
-                    value={field.content}
-                    onChange={(e) => updateCustomField(field.id, 'content', e.target.value)}
-                    placeholder="内容"
-                    disabled={!isEditing}
-                  />
-                </div>
-                {isEditing && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeCustomField(field.id)}
-                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-            {formData.customFields.length === 0 && isEditing && (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>点击上方按钮添加自定义信息</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <CustomFieldsSection 
+          fields={formData.customFields}
+          onFieldsChange={(fields) => setFormData(prev => ({ ...prev, customFields: fields }))}
+          disabled={!isEditing}
+          isEditing={isEditing}
+          onAdd={() => {
+            const newField = {
+              id: Math.random().toString(),
+              title: '',
+              content: '',
+              icon: 'FileText'
+            }
+            setFormData(prev => ({
+              ...prev,
+              customFields: [...prev.customFields, newField]
+            }))
+          }}
+          onRemove={(id) => {
+            setFormData(prev => ({
+              ...prev,
+              customFields: prev.customFields.filter(field => field.id !== id)
+            }))
+          }}
+          onUpdate={(id, field, value) => {
+            setFormData(prev => ({
+              ...prev,
+              customFields: prev.customFields.map(item => 
+                item.id === id ? { ...item, [field]: value } : item
+              )
+            }))
+          }}
+        />
       </motion.div>
 
       {/* 项目经历 */}

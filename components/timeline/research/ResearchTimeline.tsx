@@ -34,10 +34,8 @@ const mockResearches: Research[] = [
     startDate: "2020-01",
     endDate: "2023-12",
     role: "主要研究员",
-    keyFindings: "这里是重点研究成果",
     photo: null,
     customFields: [],
-    details: "",
     results: [],
     summary: ""
   }
@@ -279,10 +277,8 @@ export function ResearchTimeline() {
       startDate: "",
       endDate: "",
       role: "",
-      keyFindings: "",
       photo: null,
       customFields: [],
-      details: "",
       results: [],
       summary: ""
     }

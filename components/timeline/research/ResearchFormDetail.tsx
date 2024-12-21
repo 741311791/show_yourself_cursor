@@ -73,7 +73,8 @@ export function ResearchFormDetail({
     const newField = {
       id: Math.random().toString(),
       title: '',
-      content: ''
+      content: '',
+      icon: 'FileText'
     }
     setFormData(prev => ({
       ...prev,
@@ -88,7 +89,7 @@ export function ResearchFormDetail({
     }))
   }
 
-  const updateCustomField = (id: string, field: 'title' | 'content', value: string) => {
+  const updateCustomField = (id: string, field: 'title' | 'content' | 'icon', value: string) => {
     setFormData(prev => ({
       ...prev,
       customFields: prev.customFields.map(item => 
@@ -275,26 +276,6 @@ export function ResearchFormDetail({
           onRemove={removeCustomField}
           onUpdate={updateCustomField}
         />
-      </motion.div>
-
-      {/* 具体工作 */}
-      <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 pb-2">
-            <FileText className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">具体工作</h2>
-          </CardHeader>
-          <CardContent>
-            <AIRichTextEditor
-              content={formData.details}
-              onChange={(html) => handleInputChange('details', html)}
-              isEditing={isEditing}
-              onAIGenerate={async () => {
-                console.log('AI 生成具体工作')
-              }}
-            />
-          </CardContent>
-        </Card>
       </motion.div>
 
       {/* 研究成果 */}

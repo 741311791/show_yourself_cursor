@@ -5,7 +5,7 @@ import { motion } from "motion/react"
 import { 
   User, Mail, Phone, MapPin, Globe, 
   Calendar, FileText, Save, Edit2,
-  Plus, Trash2, Loader2
+  Loader2
 } from "lucide-react"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { AvatarUpload } from "@/components/shared/AvatarUpload"
@@ -16,6 +16,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { Alert } from "@/components/shared/Alert"
 import { Profile } from "@/types/profile"
+import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
 
 // 动画配置
 const container = {
@@ -31,12 +32,6 @@ const container = {
 const item = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0 }
-}
-
-interface CustomField {
-  id: string
-  title: string
-  content: string
 }
 
 const mockProfile: Profile = {
@@ -140,13 +135,14 @@ export function ProfileForm() {
         {
           id: Math.random().toString(),
           title: "",
-          content: ""
+          content: "",
+          icon: 'FileText'
         }
       ]
     }))
   }
 
-  const handleUpdateCustomField = (id: string, field: keyof CustomField, value: string) => {
+  const handleUpdateCustomField = (id: string, field: 'title' | 'content' | 'icon', value: string) => {
     setProfile(prev => ({
       ...prev,
       customFields: prev.customFields.map(item => 
@@ -226,7 +222,7 @@ export function ProfileForm() {
                   value={profile.name}
                   onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
                   disabled={!isEditing}
-                  placeholder="请输入姓名"
+                  placeholder="请���入姓名"
                 />
               </div>
 
@@ -299,57 +295,21 @@ export function ProfileForm() {
                 />
               </div>
             </div>
-
-            {/* 自定义字段部分 */}
-            {profile.customFields.length > 0 && (
-              <div className="border-t pt-6 space-y-4">
-                {profile.customFields.map(field => (
-                  <div key={field.id} className="relative group">
-                    <div className="flex items-center gap-4">
-                      <Input
-                        value={field.title}
-                        onChange={(e) => handleUpdateCustomField(field.id, 'title', e.target.value)}
-                        disabled={!isEditing}
-                        placeholder="字段名称"
-                        className="w-[25%]"
-                      />
-                      <Input
-                        value={field.content}
-                        onChange={(e) => handleUpdateCustomField(field.id, 'content', e.target.value)}
-                        disabled={!isEditing}
-                        placeholder="字段内容"
-                      />
-                      {isEditing && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveCustomField(field.id)}
-                          className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100"
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* 添加自定义字段按钮 */}
-            {isEditing && (
-              <motion.div variants={item} className="flex justify-center">
-                <Button
-                  variant="outline"
-                  onClick={handleAddCustomField}
-                  className="group"
-                >
-                  <Plus className="mr-2 h-4 w-4 text-primary group-hover:text-primary" />
-                  添加自定义字段
-                </Button>
-              </motion.div>
-            )}
           </CardContent>
         </Card>
+      </motion.div>
+
+      {/* 自定义字段 */}
+      <motion.div variants={item}>
+        <CustomFieldsSection 
+          fields={profile.customFields}
+          onFieldsChange={(fields) => setProfile(prev => ({ ...prev, customFields: fields }))}
+          disabled={!isEditing}
+          isEditing={isEditing}
+          onAdd={handleAddCustomField}
+          onRemove={handleRemoveCustomField}
+          onUpdate={handleUpdateCustomField}
+        />
       </motion.div>
 
       {/* 个人简介 */}

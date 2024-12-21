@@ -72,7 +72,8 @@ export function ResearchResultItem({
     const newField = {
       id: Math.random().toString(),
       title: '',
-      content: ''
+      content: '',
+      icon: 'FileText'
     }
     onUpdate({
       ...result,
@@ -87,7 +88,7 @@ export function ResearchResultItem({
     })
   }
 
-  const updateCustomField = (id: string, field: 'title' | 'content', value: string) => {
+  const updateCustomField = (id: string, field: 'title' | 'content' | 'icon', value: string) => {
     onUpdate({
       ...result,
       customFields: result.customFields.map(item => 

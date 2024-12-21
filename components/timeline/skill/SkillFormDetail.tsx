@@ -94,7 +94,8 @@ export function SkillFormDetail({
     const newField = {
       id: Math.random().toString(),
       title: '',
-      content: ''
+      content: '',
+      icon: 'FileText'
     }
     setFormData(prev => ({
       ...prev,
@@ -109,7 +110,7 @@ export function SkillFormDetail({
     }))
   }
 
-  const updateCustomField = (id: string, field: 'title' | 'content', value: string) => {
+  const updateCustomField = (id: string, field: 'title' | 'content' | 'icon', value: string) => {
     setFormData(prev => ({
       ...prev,
       customFields: prev.customFields.map(item => 

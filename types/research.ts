@@ -14,15 +14,13 @@ export interface ResearchResult {
 
 export interface Research {
   id: string
-  direction: string      // 研究方向
-  institution: string    // 研究机构
-  startDate: string     // 开始时间
-  endDate: string       // 结束时间
-  role: string          // 担当角色
-  keyFindings: string   // 重点研究成果
-  photo: string | null  // 相关图片
+  direction: string
+  institution: string
+  role: string
+  startDate: string
+  endDate: string
+  photo: string | null
   customFields: CustomField[]
-  details: string       // 具体工作
-  results: ResearchResult[] // 研究成果列表
-  summary: string       // 科研总结
+  results: ResearchResult[]
+  summary: string
 } 
