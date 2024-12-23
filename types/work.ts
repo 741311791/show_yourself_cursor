@@ -15,6 +15,7 @@ export interface Project {
 export interface Work {
   id: string
   company: string
+  title: string
   location: string
   startDate: string
   endDate: string

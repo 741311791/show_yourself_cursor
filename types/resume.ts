@@ -41,3 +41,44 @@ export interface ResumeDetail extends Resume {
 // 简历导出格式类型
 export type ResumeExportFormat = 'pdf' | 'image' | 'json'
 
+// 简历模板类型
+export type ResumeTemplate = 'modern' | 'classic' | 'minimal' | 'professional'
+
+// 简历导出格式
+export type ExportFormat = 'pdf' | 'image' | 'json'
+
+// 简历编辑器状态
+export interface ResumeEditorState {
+  data: ResumeDetail | null
+  template: ResumeTemplate
+  scale: number
+  isDirty: boolean
+}
+
+// 简历布局配置
+export interface ResumeLayout {
+  spacing: number
+  fontSize: number
+  fontFamily: string
+  primaryColor: string
+}
+
+// 添加预览相关的类型
+export interface ResumePreviewProps {
+  data: ResumeDetail | null
+  template: ResumeTemplate
+  scale?: number
+  isPrinting?: boolean
+}
+
+export interface TemplateProps {
+  data: ResumeDetail
+  metadata?: {
+    template: ResumeTemplate
+    fontSize: number
+    spacing: number
+    showIcons: boolean
+    showDates: boolean
+  }
+}
+

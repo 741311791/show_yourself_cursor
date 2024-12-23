@@ -3,19 +3,22 @@
 import { useState } from "react"
 import { Wand2 } from "lucide-react"
 import { RichTextEditor } from "@/components/timeline/shared/RichTextEditor"
+import { cn } from "@/lib/utils"
 
 interface AIRichTextEditorProps {
-  content?: string
-  onChange?: (html: string) => void
+  content: string
+  onChange: (content: string) => void
+  className?: string
   isEditing?: boolean
   onAIGenerate?: () => Promise<void>
 }
 
-export function AIRichTextEditor({
-  content = '',
-  onChange,
+export function AIRichTextEditor({ 
+  content, 
+  onChange, 
+  className,
   isEditing = true,
-  onAIGenerate
+  onAIGenerate 
 }: AIRichTextEditorProps) {
   const [isGenerating, setIsGenerating] = useState(false)
 
@@ -30,7 +33,7 @@ export function AIRichTextEditor({
   }
 
   return (
-    <div className="relative">
+    <div className={cn("relative", className)}>
       <RichTextEditor 
         content={content}
         onChange={onChange}

@@ -1,13 +1,15 @@
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
-import { FileText, MoreVertical } from "lucide-react"
+import { FileText } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { zhCN } from "date-fns/locale"
-import { Button } from "@/components/ui/button"
 import { ResumeDropdownMenu } from "@/components/resume/traditional/ResumeDropdownMenu"
 import { Resume } from "@/types/resume"
+import Image from "next/image"
+
+// 定义操作类型
+export type ResumeAction = 'rename' | 'edit' | 'duplicate' | 'export' | 'delete'
 
 const container = {
   hidden: { opacity: 0 },
@@ -42,9 +44,11 @@ export function ResumeGrid({ resumes, onAction }: ResumeGridProps) {
           <div className="group relative p-6 rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow">
             {resume.thumbnail && (
               <div className="aspect-video mb-4 rounded-lg overflow-hidden">
-                <img 
+                <Image 
                   src={resume.thumbnail} 
                   alt={resume.name}
+                  width={400}
+                  height={225}
                   className="w-full h-full object-cover"
                 />
               </div>
