@@ -1,147 +1,84 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useRef } from "react"
+import { useResumeStore } from "@/store/useResumeStore"
+import { ProfileSection } from "@/components/resume/sections/ProfileSection"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
 import { 
   User, FileText, Medal, Share2, Briefcase,
   GraduationCap, Award, Gamepad2, Languages,
   Puzzle, BookOpen, Wrench, Users
 } from "lucide-react"
-import { ProfileSection } from "@/components/resume/sections/ProfileSection"
-import { EducationSection } from "@/components/resume/sections/EducationSection"
-// import { WorkSection } from "@/components/resume/sections/WorkSection"
-// import { ProjectSection } from "@/components/resume/sections/ProjectSection"
-// import { SkillSection } from "@/components/resume/sections/SkillSection"
-// import { AwardSection } from "@/components/resume/sections/AwardSection"
-import { ResumeDetail } from "@/types/resume"
 
-// 更新图标映射
-const sectionIcons = {
-  basics: User,
-  summary: FileText,
-  awards: Medal,
-  profiles: Share2,
-  experience: Briefcase,
-  education: GraduationCap,
-  certifications: Award,
-  interests: Gamepad2,
-  languages: Languages,
-  projects: Puzzle,
-  publications: BookOpen,
-  skills: Wrench,
-  references: Users,
-}
+// 定义部分配置
+const sections = [
+  { id: 'profile', icon: User, title: "基本信息" },
+  { id: 'education', icon: GraduationCap, title: "教育经历" },
+  { id: 'work', icon: Briefcase, title: "工作经历" },
+  { id: 'projects', icon: Puzzle, title: "项目经历" },
+  { id: 'skills', icon: Wrench, title: "技能特长" },
+  { id: 'awards', icon: Medal, title: "获奖经历" },
+  { id: 'certificates', icon: Award, title: "证书资质" },
+  { id: 'publications', icon: BookOpen, title: "出版物" },
+  { id: 'languages', icon: Languages, title: "语言能力" },
+  { id: 'interests', icon: Gamepad2, title: "兴趣爱好" },
+  { id: 'references', icon: Users, title: "推荐信" },
+  { id: 'profiles', icon: Share2, title: "社交账号" }
+] as const
 
-// 定义部分标题
-const sectionTitles = {
-  basics: "基本信息",
-  summary: "个人简介",
-  awards: "获奖经历",
-  profiles: "社交账号",
-  experience: "工作经历",
-  education: "教育经历",
-  certifications: "证书资质",
-  interests: "兴趣爱好",
-  languages: "语言能力",
-  projects: "项目经历",
-  publications: "出版物",
-  skills: "技能特长"
-}
+export function LeftSidebar() {
+  const { resumeData } = useResumeStore()
+  const contentRef = useRef<HTMLDivElement>(null)
 
-interface LeftSidebarProps {
-  data?: ResumeDetail
-  onUpdate?: (data: Partial<ResumeDetail>) => void
-}
-
-export function LeftSidebar({ data, onUpdate }: LeftSidebarProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  const scrollIntoView = (selector: string) => {
-    const section = containerRef.current?.querySelector(selector)
-    section?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const handleUpdate = (key: keyof ResumeDetail) => (value: ResumeDetail[typeof key]) => {
-    onUpdate?.({ [key]: value })
+  const scrollToSection = (sectionId: string) => {
+    const section = contentRef.current?.querySelector(`#${sectionId}`)
+    if (section) {
+      section.scrollIntoView({ 
+        behavior: "smooth",
+        block: "start"
+      })
+    }
   }
 
   return (
-    <div className="flex bg-secondary-accent/30">
-      <div className="hidden basis-12 flex-col items-center justify-between bg-secondary-accent/30 py-4 sm:flex">
-        {Object.entries(sectionIcons).map(([id, Icon]) => (
+    <div className="flex h-full">
+      {/* 左侧图标导航栏 */}
+      <div className="flex w-12 flex-col items-center gap-1 bg-muted/30 py-4">
+        {sections.map(({ id, icon: Icon, title }) => (
           <Button
             key={id}
             size="icon"
             variant="ghost"
-            className="size-8 rounded-full"
-            onClick={() => scrollIntoView(`#${id}`)}
+            className="h-8 w-8 rounded-lg"
+            title={title}
+            onClick={() => scrollToSection(id)}
           >
             <Icon className="h-4 w-4" />
           </Button>
         ))}
       </div>
 
-      <ScrollArea className="h-screen flex-1 pb-16 lg:pb-0">
-        <div ref={containerRef} className="grid gap-y-6 p-6">
-          {/* 基本信息 */}
-          <section id="basics">
-            <h2 className="mb-4 text-lg font-semibold">{sectionTitles.basics}</h2>
-            <ProfileSection 
-              data={data?.profile}
-              onChange={handleUpdate("profile")}
-            />
+      {/* 右侧内容区域 */}
+      <ScrollArea className="h-[calc(100vh-4rem)] flex-1">
+        <div ref={contentRef} className="space-y-8 p-6">
+          {/* 基本信息部分 */}
+          <section id="profile">
+            <ProfileSection />
           </section>
 
-          {/* 教育经历 */}
-          <section id="education">
-            <h2 className="mb-4 text-lg font-semibold">{sectionTitles.education}</h2>
-            <EducationSection 
-              data={data?.education}
-              onChange={handleUpdate("education")}
-            />
-          </section>
-
-          {/* 工作经历 */}
-          {/* <section id="experience">
-            <h2 className="mb-4 text-lg font-semibold">{sectionTitles.experience}</h2>
-            <WorkSection 
-              data={data?.work}
-              onChange={handleUpdate("work")}
-            />
-          </section>
-          <Separator /> */}
-
-          {/* 项目经历 */}
-          {/* <section id="projects">
-            <h2 className="mb-4 text-lg font-semibold">{sectionTitles.projects}</h2>
-            <ProjectSection 
-              data={data?.projects}
-              onChange={handleUpdate("projects")}
-            />
-          </section>
-          <Separator /> */}
-
-          {/* 技能特长 */}
-          {/* <section id="skills">
-            <h2 className="mb-4 text-lg font-semibold">{sectionTitles.skills}</h2>
-            <SkillSection 
-              data={data?.skills}
-              onChange={handleUpdate("skills")}
-            />
-          </section>
-          <Separator /> */}
-
-          {/* 获奖经历 */}
-          {/* <section id="awards">
-            <h2 className="mb-4 text-lg font-semibold">{sectionTitles.awards}</h2>
-            <AwardSection 
-              data={data?.awards}
-              onChange={handleUpdate("awards")}
-            />
-          </section> */}
+          {/* 其他部分 */}
+          {sections.slice(1).map(({ id, title }) => (
+            <section key={id} id={id} className="space-y-4">
+              <h2 className="text-lg font-semibold">{title}</h2>
+              <div className="rounded-lg border bg-card p-4">
+                {/* 后续添加对应的编辑组件 */}
+                <div className="h-32 flex items-center justify-center text-muted-foreground">
+                  开发中...
+                </div>
+              </div>
+            </section>
+          ))}
         </div>
       </ScrollArea>
     </div>

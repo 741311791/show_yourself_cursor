@@ -1,4 +1,4 @@
-import { CustomField } from "./shared"  // 导入共享类型
+import { CustomField } from "@/types/shared"  // 导入共享类型
 
 export interface Education {
   id: string

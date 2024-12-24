@@ -10,11 +10,13 @@ import { Award } from "@/types/award"
 import { Certificate } from "@/types/certificate"
 import { Publication } from "@/types/publication"
 import { CustomBlockItem } from "@/types/custom"
+import { SectionConfig } from "@/types/shared"
 
 // 简历基本信息类型
 export interface Resume {
   id: string
   name: string          // 简历名称
+  createdBy: string     // 创建者
   updatedAt: string     // 最后更新时间
   createdAt: string     // 创建时间
   isTemplate?: boolean  // 是否为模板
@@ -36,6 +38,7 @@ export interface ResumeDetail extends Resume {
   certificates?: Certificate[] // 证书资质
   publications?: Publication[] // 出版物
   customBlocks?: CustomBlockItem[] // 自定义模块
+  config?: ResumeConfig    // 添加配置字段
 }
 
 // 简历导出格式类型
@@ -79,6 +82,39 @@ export interface TemplateProps {
     spacing: number
     showIcons: boolean
     showDates: boolean
+  }
+}
+
+export interface ResumeConfig {
+  profile?: SectionConfig
+  education?: SectionConfig
+  // ... 其他部分的配置
+}
+
+// 默认配置
+export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
+  profile: {
+    title: "基本信息",
+    enabled: true,
+    fields: [
+      { key: "name", label: "姓名", icon: "User" },
+      { key: "title", label: "头衔", icon: "Briefcase" },
+      { key: "email", label: "邮箱", icon: "Mail" },
+      { key: "phone", label: "电话", icon: "Phone" },
+      { key: "location", label: "地址", icon: "MapPin" },
+      { key: "website", label: "个人网站", icon: "Globe" },
+      { key: "summary", label: "个人总结" }
+    ]
+  },
+  education: {
+    title: "教育经历",
+    enabled: true,
+    fields: [
+      { key: "school", label: "学校名称", icon: "School" },
+      { key: "degree", label: "学位", icon: "GraduationCap" },
+      { key: "field", label: "专业", icon: "BookOpen" },
+      // ... 其他字段配置
+    ]
   }
 }
 
