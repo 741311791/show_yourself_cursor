@@ -37,7 +37,7 @@ const mockEducations: Education[] = [
     courses: "数据结构、算法",
     gpa: "3.8",
     degree: "学士",
-    photo: null,
+    photo: "",
     customFields: [],
     summary: ""
   }
@@ -295,7 +295,7 @@ export function EducationTimeline() {
       courses: "",
       gpa: "",
       degree: "",
-      photo: null,
+      photo: "",
       customFields: [],
       summary: ""
     }

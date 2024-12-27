@@ -9,8 +9,6 @@ export interface FieldLabel {
 export interface SectionConfig {
   title: string              // 部分标题
   fields: FieldLabel[]       // 字段标签配置
-  enabled: boolean          // 是否启用
-  order?: number           // 显示顺序
 }
 
 // 保持原有的 CustomField 不变

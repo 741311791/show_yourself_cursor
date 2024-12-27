@@ -1,16 +1,24 @@
-import { useEffect, useState } from "react"
-import { useMediaQuery } from "usehooks-ts"
+"use client"
+
+import { useState, useEffect } from 'react'
 
 export function useBreakpoint() {
-  const [mounted, setMounted] = useState(false)
-
-  const isDesktop = useMediaQuery("(min-width: 1024px)")
+  const [isDesktop, setIsDesktop] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    const checkIsDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024)
+    }
+
+    // 初始检查
+    checkIsDesktop()
+
+    // 添加监听器
+    window.addEventListener('resize', checkIsDesktop)
+
+    // 清理
+    return () => window.removeEventListener('resize', checkIsDesktop)
   }, [])
 
-  return {
-    isDesktop: mounted ? isDesktop : true,
-  }
+  return { isDesktop }
 } 

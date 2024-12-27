@@ -88,32 +88,91 @@ export interface TemplateProps {
 export interface ResumeConfig {
   profile?: SectionConfig
   education?: SectionConfig
-  // ... 其他部分的配置
+  work?: SectionConfig
+  projects?: SectionConfig
+  skills?: SectionConfig
+  awards?: SectionConfig
+  certificates?: SectionConfig
+  languages?: SectionConfig
 }
 
 // 默认配置
 export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
   profile: {
     title: "基本信息",
-    enabled: true,
     fields: [
       { key: "name", label: "姓名", icon: "User" },
-      { key: "title", label: "头衔", icon: "Briefcase" },
+      { key: "title", label: "职位", icon: "Briefcase" },
       { key: "email", label: "邮箱", icon: "Mail" },
       { key: "phone", label: "电话", icon: "Phone" },
-      { key: "location", label: "地址", icon: "MapPin" },
-      { key: "website", label: "个人网站", icon: "Globe" },
-      { key: "summary", label: "个人总结" }
+      { key: "location", label: "地点", icon: "MapPin" },
+      { key: "summary", label: "个人简介", icon: "FileText" }
     ]
   },
   education: {
     title: "教育经历",
-    enabled: true,
     fields: [
-      { key: "school", label: "学校名称", icon: "School" },
-      { key: "degree", label: "学位", icon: "GraduationCap" },
-      { key: "field", label: "专业", icon: "BookOpen" },
-      // ... 其他字段配置
+      { key: "school", label: "学校", icon: "GraduationCap" },
+      { key: "major", label: "专业", icon: "BookOpen" },
+      { key: "degree", label: "学位", icon: "Award" },
+      { key: "startDate", label: "开始时间", icon: "CalendarRange" },
+      { key: "endDate", label: "结束时间", icon: "CalendarRange" },
+      { key: "gpa", label: "GPA", icon: "Star" },
+      { key: "courses", label: "主修课程", icon: "ListChecks" },
+      { key: "summary", label: "在校经历", icon: "FileText" }
+    ]
+  },
+  work: {
+    title: "工作经历",
+    fields: [
+      { key: "company", label: "公司", icon: "Building2" },
+      { key: "position", label: "职位", icon: "Briefcase" },
+      { key: "startDate", label: "开始时间", icon: "CalendarRange" },
+      { key: "endDate", label: "结束时间", icon: "CalendarRange" },
+      { key: "location", label: "地点", icon: "MapPin" },
+      { key: "summary", label: "工作内容", icon: "FileText" }
+    ]
+  },
+  projects: {
+    title: "项目经历",
+    fields: [
+      { key: "name", label: "项目名称", icon: "Folder" },
+      { key: "role", label: "担任角色", icon: "UserCircle" },
+      { key: "startDate", label: "开始时间", icon: "CalendarRange" },
+      { key: "endDate", label: "结束时间", icon: "CalendarRange" },
+      { key: "summary", label: "项目描述", icon: "FileText" }
+    ]
+  },
+  skills: {
+    title: "技能特长",
+    fields: [
+      { key: "category", label: "类别", icon: "Tag" },
+      { key: "items", label: "技能项", icon: "List" }
+    ]
+  },
+  awards: {
+    title: "获奖经历",
+    fields: [
+      { key: "title", label: "奖项名称", icon: "Award" },
+      { key: "date", label: "获奖时间", icon: "Calendar" },
+      { key: "issuer", label: "颁发机构", icon: "Building" },
+      { key: "summary", label: "奖项描述", icon: "FileText" }
+    ]
+  },
+  certificates: {
+    title: "证书资质",
+    fields: [
+      { key: "name", label: "证书名称", icon: "Certificate" },
+      { key: "issuer", label: "颁发机构", icon: "Building" },
+      { key: "date", label: "获得时间", icon: "Calendar" },
+      { key: "summary", label: "证书描述", icon: "FileText" }
+    ]
+  },
+  languages: {
+    title: "语言能力",
+    fields: [
+      { key: "language", label: "语言", icon: "Languages" },
+      { key: "level", label: "水平", icon: "BarChart" }
     ]
   }
 }

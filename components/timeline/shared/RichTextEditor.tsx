@@ -175,12 +175,14 @@ interface RichTextEditorProps {
   content?: string
   onChange?: (html: string) => void
   isEditing?: boolean
+  className?: string
 }
 
 export function RichTextEditor({ 
   content = '', 
   onChange,
-  isEditing = true
+  isEditing = true,
+  className
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -221,11 +223,18 @@ export function RichTextEditor({
   })
 
   return (
-    <div className="border rounded-lg overflow-hidden bg-background">
+    <div className={cn(
+      "border rounded-lg overflow-hidden bg-background",
+      className
+    )}>
       {isEditing && <MenuBar editor={editor} />}
       <EditorContent 
         editor={editor} 
-        className="p-4 min-h-[120px]"
+        className={cn(
+          "p-4",
+          "min-h-[120px]",
+          isEditing && "pb-14"
+        )}
       />
     </div>
   )

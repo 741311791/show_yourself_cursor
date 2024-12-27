@@ -48,7 +48,7 @@ export function EducationFormDetail({
 }: EducationFormDetailProps) {
   const [formData, setFormData] = useState<Education>(education)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(education.photo)
+  const [preview, setPreview] = useState<string | null>(education.photo ?? null)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean
@@ -235,7 +235,7 @@ export function EducationFormDetail({
       {/* 自定义字段 */}
       <motion.div variants={item}>
         <CustomFieldsSection 
-          fields={formData.customFields}
+          fields={formData.customFields ?? []}
           onFieldsChange={(fields) => setFormData(prev => ({ ...prev, customFields: fields }))}
           disabled={!isEditing}
           isEditing={isEditing}
@@ -248,19 +248,19 @@ export function EducationFormDetail({
             }
             setFormData(prev => ({
               ...prev,
-              customFields: [...prev.customFields, newField]
+              customFields: [...(prev.customFields ?? []), newField]
             }))
           }}
           onRemove={(id) => {
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.filter(field => field.id !== id)
+              customFields: (prev.customFields ?? []).filter(field => field.id !== id)
             }))
           }}
           onUpdate={(id, field, value) => {
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.map(item => 
+              customFields: (prev.customFields ?? []).map(item => 
                 item.id === id ? { ...item, [field]: value } : item
               )
             }))
@@ -277,7 +277,7 @@ export function EducationFormDetail({
           </CardHeader>
           <CardContent className="space-y-4">
             <AIRichTextEditor 
-              content={formData.summary}
+              content={formData.summary ?? ''}
               onChange={(html) => handleInputChange('summary', html)}
               isEditing={isEditing}
               onAIGenerate={async () => {

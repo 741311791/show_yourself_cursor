@@ -19,6 +19,7 @@ import { useResumeStore } from "@/store/useResumeStore"
 import { Button } from "@/components/ui/button"
 import { Edit2, Check, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ConfigActions } from "@/components/resume/shared/ConfigActions"
 
 interface ProfileSectionProps {
   initialData?: Profile
@@ -231,6 +232,43 @@ export function ProfileSection({ initialData }: ProfileSectionProps) {
     console.log('ResumeData changed:', resumeData)
   }, [resumeData])
 
+  // 处理配置加载
+  const handleLoadConfig = useCallback(async () => {
+    try {
+      // TODO: 实现从API加载配置的逻辑
+      const response = await fetch(`/api/users/current/configs/profile`)
+      const data = await response.json()
+      
+      if (data.profile) {
+        // 更新全局状态
+        updateSection('profile', data.profile)
+      }
+    } catch (error) {
+      console.error('加载配置失败:', error)
+      // TODO: 添加错误提示
+    }
+  }, [updateSection])
+
+  // 处理配置保存
+  const handleSaveConfig = useCallback(async () => {
+    try {
+      // TODO: 实现保存配置到API的逻辑
+      await fetch(`/api/users/current/configs/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profile: resumeData?.profile
+        }),
+      })
+      // TODO: 添加成功提示
+    } catch (error) {
+      console.error('保存配置失败:', error)
+      // TODO: 添加错误提示
+    }
+  }, [resumeData?.profile])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -238,6 +276,11 @@ export function ProfileSection({ initialData }: ProfileSectionProps) {
           label={config?.title ?? ""}
           variant="title"
           onSave={handleTitleChange}
+        />
+        <ConfigActions
+          section="profile"
+          onLoad={handleLoadConfig}
+          onSave={handleSaveConfig}
         />
       </div>
 

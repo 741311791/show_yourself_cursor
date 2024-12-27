@@ -46,7 +46,7 @@ export function ProjectFormDetail({
 }: ProjectFormDetailProps) {
   const [formData, setFormData] = useState<Project>(project)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(project.photo)
+  const [preview, setPreview] = useState<string | null>(project.photo ?? null)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean

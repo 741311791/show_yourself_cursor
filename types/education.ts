@@ -4,12 +4,13 @@ export interface Education {
   id: string
   school: string
   degree: string
-  field: string
   startDate: string
   endDate: string
   gpa?: string
   location?: string
-  description: string
-  courses?: string[]
-  highlights?: string[]
+  courses?: string
+  photo?: string
+  major?: string
+  customFields?: CustomField[]
+  summary?: string
 } 

@@ -3,6 +3,9 @@
 import { useRef } from "react"
 import { useResumeStore } from "@/store/useResumeStore"
 import { ProfileSection } from "@/components/resume/sections/ProfileSection"
+import { EducationSection } from "@/components/resume/sections/EducationSection"
+import { WorkSection } from "@/components/resume/sections/WorkSection"
+import { ProjectSection } from "@/components/resume/sections/ProjectSection"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
@@ -67,12 +70,27 @@ export function LeftSidebar() {
             <ProfileSection />
           </section>
 
+          {/* 教育经历部分 */}
+          <section id="education">
+            <EducationSection />
+          </section>
+
+          {/* 工作经历部分 */}
+          <section id="work">
+            <WorkSection />
+          </section>
+
+          {/* 项目经历部分 */}
+          <section id="projects">
+            <ProjectSection />
+          </section>
+
+
           {/* 其他部分 */}
-          {sections.slice(1).map(({ id, title }) => (
+          {sections.slice(4).map(({ id, title }) => (
             <section key={id} id={id} className="space-y-4">
               <h2 className="text-lg font-semibold">{title}</h2>
               <div className="rounded-lg border bg-card p-4">
-                {/* 后续添加对应的编辑组件 */}
                 <div className="h-32 flex items-center justify-center text-muted-foreground">
                   开发中...
                 </div>

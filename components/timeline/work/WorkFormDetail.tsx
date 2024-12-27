@@ -22,7 +22,8 @@ import {
   FileText, Save, Edit2,
   Camera, Plus
 } from "lucide-react"
-import { Work, Project } from "@/types/work"
+import { Work } from "@/types/work"
+import { Project } from "@/types/project"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { ProjectItem } from "./ProjectItem"
 import { ImageUpload } from "@/components/shared/ImageUpload"
@@ -105,10 +106,14 @@ export function WorkFormDetail({
     const newProject: Project = {
       id: Math.random().toString(),
       name: "",
+      role: "",
+      company: "",
+      source: "custom",
       startDate: "",
       endDate: "",
-      description: "",
+      summary: "",
       techStack: "",
+      description: "",
       achievement: "",
       isCore: false,
       order: formData.projects.length,
@@ -345,13 +350,13 @@ export function WorkFormDetail({
               >
                 <div className="space-y-4">
                   {formData.projects
-                    .sort((a, b) => a.order - b.order)
+                    .sort((a, b) => (a.order - b.order))
                     .map((project) => (
                       <ProjectItem
                         key={project.id}
                         project={project}
                         isEditing={isEditing}
-                        onUpdate={updateProject}
+                        onUpdate={(id, field, value) => updateProject(id, field as keyof Project, value)}
                         onRemove={removeProject}
                         onToggleCore={toggleCoreProject}
                       />

@@ -8,7 +8,7 @@ import {
   Calendar, Code, FileText,
   GripVertical
 } from "lucide-react"
-import { Project } from "@/types/work"
+import { Project } from "@/types/project"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { Tooltip } from "@/components/shared/Tooltip"
 import { Button } from "@/components/ui/button"

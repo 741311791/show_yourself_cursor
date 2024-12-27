@@ -1,16 +1,5 @@
 import { CustomField } from "./shared"  // 导入共享类型
-export interface Project {
-  id: string
-  name: string
-  startDate: string
-  endDate: string
-  description: string
-  techStack: string
-  achievement: string
-  isCore: boolean
-  order: number
-  customFields: CustomField[]
-}
+import { Project } from "./project"
 
 export interface Work {
   id: string
