@@ -13,7 +13,7 @@ export interface Project {
   summary: string
   isCore?: boolean
   source: 'custom' | 'work'
-  photo?: string | null
+  photos?: string[]
   order: number
   customFields: CustomField[]
 } 

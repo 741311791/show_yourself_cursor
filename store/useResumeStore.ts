@@ -36,21 +36,24 @@ export const useResumeStore = create<ResumeStore>()(
 
     updateConfig: (sectionKey, newConfig) =>
       set((state) => {
+        console.log('Current state:', state)
+        
+        if (!state.resumeData) {
+          console.log('No resumeData found')
+          return state
+        }
+
         const newState = {
-          resumeData: state.resumeData ? {
+          resumeData: {
             ...state.resumeData,
             config: {
               ...state.resumeData.config,
               [sectionKey]: newConfig
             }
-          } : null
+          }
         }
-        console.log('State updated (updateConfig):', {
-          sectionKey,
-          oldConfig: state.resumeData?.config?.[sectionKey],
-          newConfig,
-          fullState: newState
-        })
+        
+        console.log('New state:', newState)
         return newState
       })
   }))

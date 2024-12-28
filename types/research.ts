@@ -19,7 +19,7 @@ export interface Research {
   role: string
   startDate: string
   endDate: string
-  photo: string | null
+  photos: string[]
   customFields: CustomField[]
   results: ResearchResult[]
   summary: string

@@ -5,8 +5,6 @@ import { Panel, PanelGroup, PanelResizeHandle } from "@/components/ui/panel"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useBreakpoint } from "@/hooks/useBreakpoint"
-import { ResumeEditor } from "@/components/resume/builder/ResumeEditor"
-import { ResumePreview } from "@/components/resume/builder/ResumePreview"
 import { ResumeToolbar } from "@/components/resume/builder/ResumeToolbar"
 import { LeftSidebar } from "@/components/resume/builder/sidebars/LeftSidebar"
 import { RightSidebar } from "@/components/resume/builder/sidebars/RightSidebar"
@@ -92,6 +90,17 @@ export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
     console.log('导出格式:', format)
   }
 
+  function WhiteboardPlaceholder() {
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-white rounded-lg shadow-sm">
+        <div className="text-center space-y-2">
+          <h3 className="text-xl font-semibold text-gray-800">白板页面</h3>
+          <p className="text-sm text-gray-500">该功能正在开发中...</p>
+        </div>
+      </div>
+    )
+  }
+
   const MainContent = () => (
     <div className="relative flex h-screen flex-col">
       <ResumeToolbar
@@ -101,11 +110,7 @@ export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
       />
 
       <div className="flex-1 overflow-auto bg-muted/30 p-6">
-        <ResumePreview
-          data={state.data}
-          template={state.template}
-          scale={state.scale}
-        />
+        <WhiteboardPlaceholder />
       </div>
     </div>
   )
@@ -136,10 +141,9 @@ export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
         />
 
         <Panel>
-          <ResumeEditor
-            data={state.data}
-            onUpdate={handleUpdate}
-          />
+          <div className="flex-1 overflow-auto bg-muted/30 p-6">
+            <WhiteboardPlaceholder />
+          </div>
         </Panel>
 
         <PanelResizeHandle

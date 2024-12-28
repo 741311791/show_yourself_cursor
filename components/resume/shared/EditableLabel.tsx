@@ -10,9 +10,10 @@ interface EditableLabelProps {
   label: string
   onSave: (newLabel: string) => void
   variant?: 'default' | 'title'
+  className?: string
 }
 
-export function EditableLabel({ label, onSave, variant = 'default' }: EditableLabelProps) {
+export function EditableLabel({ label, onSave, variant = 'default', className }: EditableLabelProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editingLabel, setEditingLabel] = useState(label)
   const inputRef = useRef<HTMLInputElement>(null)

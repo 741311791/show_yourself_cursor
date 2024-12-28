@@ -10,7 +10,6 @@ import { Award } from "@/types/award"
 import { Certificate } from "@/types/certificate"
 import { Publication } from "@/types/publication"
 import { CustomBlockItem } from "@/types/custom"
-import { SectionConfig } from "@/types/shared"
 
 // 简历基本信息类型
 export interface Resume {
@@ -96,10 +95,24 @@ export interface ResumeConfig {
   languages?: SectionConfig
 }
 
-// 默认配置
+export interface FieldLabel {
+  key: string
+  label: string
+  icon?: string
+}
+
+// 修改 SectionConfig 接口
+export interface SectionConfig {
+  title: string
+  isShow: boolean  // 添加显示控制字段
+  fields: FieldLabel[]
+}
+
+// 更新默认配置
 export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
   profile: {
     title: "基本信息",
+    isShow: true,
     fields: [
       { key: "name", label: "姓名", icon: "User" },
       { key: "title", label: "职位", icon: "Briefcase" },
@@ -111,6 +124,7 @@ export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
   },
   education: {
     title: "教育经历",
+    isShow: true,
     fields: [
       { key: "school", label: "学校", icon: "GraduationCap" },
       { key: "major", label: "专业", icon: "BookOpen" },
@@ -124,6 +138,7 @@ export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
   },
   work: {
     title: "工作经历",
+    isShow: true,
     fields: [
       { key: "company", label: "公司", icon: "Building2" },
       { key: "position", label: "职位", icon: "Briefcase" },
@@ -135,6 +150,7 @@ export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
   },
   projects: {
     title: "项目经历",
+    isShow: true,
     fields: [
       { key: "name", label: "项目名称", icon: "Folder" },
       { key: "role", label: "担任角色", icon: "UserCircle" },
@@ -145,6 +161,7 @@ export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
   },
   skills: {
     title: "技能特长",
+    isShow: true,
     fields: [
       { key: "category", label: "类别", icon: "Tag" },
       { key: "items", label: "技能项", icon: "List" }
@@ -152,6 +169,7 @@ export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
   },
   awards: {
     title: "获奖经历",
+    isShow: true,
     fields: [
       { key: "title", label: "奖项名称", icon: "Award" },
       { key: "date", label: "获奖时间", icon: "Calendar" },
@@ -161,6 +179,7 @@ export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
   },
   certificates: {
     title: "证书资质",
+    isShow: true,
     fields: [
       { key: "name", label: "证书名称", icon: "Certificate" },
       { key: "issuer", label: "颁发机构", icon: "Building" },
@@ -170,6 +189,7 @@ export const DEFAULT_RESUME_CONFIG: ResumeConfig = {
   },
   languages: {
     title: "语言能力",
+    isShow: true,
     fields: [
       { key: "language", label: "语言", icon: "Languages" },
       { key: "level", label: "水平", icon: "BarChart" }

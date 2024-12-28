@@ -47,7 +47,7 @@ export function AwardFormDetail({
 }: AwardFormDetailProps) {
   const [formData, setFormData] = useState<Award>(award)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(award.photo)
+  const [preview, setPreview] = useState<string | null>(award.photos[0])
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean

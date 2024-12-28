@@ -1,0 +1,312 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  COMMON_USER
+  VIP_USER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
+enum SchoolExperienceSource {
+  CLUB
+  COMPETITION
+  VOLUNTEER
+  OTHER
+}
+
+enum ResearchResultType {
+  PAPER
+  PATENT
+  CONFERENCE
+  OTHER
+}
+
+enum PublicationType {
+  JOURNAL
+  CONFERENCE
+  BOOK
+  OTHER
+}
+
+model User {
+  id          String    @id @default(cuid())
+  username    String
+  email       String    @unique
+  password    String
+  salt        String?
+  role        UserRole  @default(COMMON_USER)
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+}
+
+
+model Profile {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String?
+  birthday     String?
+  gender       String?
+  website      String?
+  title        String?
+  email        String?
+  phone        String?
+  location     String?
+  avatar       String?
+  summary      String?
+  customFields Json[]   // CustomField[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Education {
+  id          String   @id @default(cuid()) 
+  userId      String
+  school      String
+  degree      String?
+  startDate   DateTime
+  endDate     DateTime?
+  gpa         String?
+  location    String?
+  courses     String?
+  photos      String[]
+  major       String?
+  summary      String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+
+model SchoolExperience {
+  id           String                @id @default(cuid())
+  userId       String
+  educationId  String?  
+  name         String                // 活动/项目名称
+  organization String                // 组织/社团名称
+  role         String                // 担任角色
+  startDate    DateTime
+  endDate      DateTime?
+  description  String?               // 详细描述
+  achievement  String?               // 成就/获奖
+  isCore       Boolean?              // 是否为核心经历
+  source       SchoolExperienceSource @default(OTHER)  // 经历类型
+  photos       String[]              // 照片URL
+  order        Int                   // 排序
+  summary      String?               // 简要总结
+  customFields Json[]                // CustomField[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  @@index([userId])
+}
+
+model Work {
+  id          String   @id @default(cuid())
+  userId      String
+  company     String
+  title       String
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  position    String?
+  photos      String[]
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  userId      String
+  workId      String?
+  name        String
+  company     String? 
+  role        String?
+  startDate   DateTime
+  endDate     DateTime?
+  description String?
+  techStack   String?
+  achievements String?
+  isCore      Boolean?
+  photos      String[]
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  category    String?
+  level       Int?
+  certDate    DateTime?
+  certName    String?
+  certOrg     String?
+  photos      String[]
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model SkillPortfolio {
+  id          String   @id @default(cuid()) 
+  userId      String
+  skillId     String
+  name        String
+  date        DateTime
+  description String?
+  photos      String[]
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Award {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  level       String?
+  issuer      String?
+  acquireDate DateTime
+  photos      String[]
+  ranking     String?
+  participants String?
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Research {
+  id          String   @id @default(cuid())
+  userId      String
+  direction   String
+  institution String
+  role        String
+  startDate   DateTime
+  endDate     DateTime?
+  photos      String[]
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model ResearchResult {
+  id          String   @id @default(cuid())
+  researchId  String
+  type        ResearchResultType
+  name        String
+  role        String
+  date        DateTime
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([researchId])
+}
+
+model Certificate {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  issuer      String
+  date        DateTime
+  level       String?
+  number      String?
+  photos      String[]
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}   
+
+
+model Language {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  level       String
+  certificate String?
+  acquireDate DateTime?
+  photos      String[]
+  score       String?
+  validPeriod DateTime?
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Hobby {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  cover       String?
+  photos      String[]
+  description String?
+  startDate   DateTime
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Publication {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  type        PublicationType
+  publishDate DateTime
+  journal     String?
+  database    String?
+  photos      String[]
+  summary     String?
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}

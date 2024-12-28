@@ -9,7 +9,7 @@ export interface Work {
   startDate: string
   endDate: string
   position: string
-  photo: string | null
+  photos: string[]
   projects: Project[]
   customFields: CustomField[]
   summary: string

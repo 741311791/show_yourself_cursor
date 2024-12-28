@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { Profile } from "@/types/profile"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,27 +8,25 @@ import * as Icons from "lucide-react"
 import { AvatarUpload } from "@/components/shared/AvatarUpload"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { CustomFieldsSection } from "@/components/resume/shared/CustomFieldsSection"
-import { FieldLabel } from "@/types/shared"
 import { LucideIcon } from "lucide-react"
 import { SectionConfigDialog } from "@/components/resume/shared/SectionConfigDialog"
 import { ResumeDetail, DEFAULT_RESUME_CONFIG } from "@/types/resume"
 import { useDebounce } from "@/hooks/useDebounce"
-import { ResumeConfig } from "@/types/resume"
+import { FieldLabel } from "@/types/resume"
 import { CustomField } from "@/types/shared"
 import { useResumeStore } from "@/store/useResumeStore"
 import { Button } from "@/components/ui/button"
 import { Edit2, Check, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ConfigActions } from "@/components/resume/shared/ConfigActions"
+import { Switch } from "@/components/ui/switch"
 
-interface ProfileSectionProps {
-  initialData?: Profile
-}
 
 interface EditableLabelProps {
   label: string
   onSave: (newLabel: string) => void
   variant?: 'default' | 'title'
+  className?: string
 }
 
 function EditableLabel({ label, onSave, variant = 'default' }: EditableLabelProps) {
@@ -129,34 +127,49 @@ function EditableLabel({ label, onSave, variant = 'default' }: EditableLabelProp
   )
 }
 
-export function ProfileSection({ initialData }: ProfileSectionProps) {
-  const { resumeData, updateSection, updateConfig } = useResumeStore()
-  const config = resumeData?.config?.profile ?? DEFAULT_RESUME_CONFIG.profile!
+export function ProfileSection() {
+  const config = useResumeStore(
+    state => state.resumeData?.config?.profile ?? DEFAULT_RESUME_CONFIG.profile!
+  )
+  const updateConfig = useResumeStore(state => state.updateConfig)
+  const updateSection = useResumeStore(state => state.updateSection)
+  const resumeData = useResumeStore(state => state.resumeData)
 
-  const [profile, setProfile] = useState<Profile>(() => {
-    const defaultProfile: Profile = {
-      id: crypto.randomUUID(),
-      name: "",
-      email: "",
-      phone: "",
-      location: "",
-      title: "",
-      summary: "",
-      customFields: []
-    }
+  const handleVisibilityChange = useCallback((checked: boolean) => {
+    const store = useResumeStore.getState()
+    console.log('Current store state:', store)
     
-    return initialData ?? defaultProfile
-  })
+    updateConfig('profile', {
+      ...config,
+      isShow: checked
+    })
+    
+    setTimeout(() => {
+      console.log('Updated store state:', useResumeStore.getState())
+    }, 0)
+  }, [config, updateConfig])
 
-  // 使用防抖处理更新
+  const [profile, setProfile] = useState<Profile>(() => ({
+    id: crypto.randomUUID(),
+    name: "",
+    email: "",
+    phone: "",
+    location: "",
+    title: "",
+    summary: "",
+    customFields: []
+  }))
+
   const debouncedProfile = useDebounce(profile, 500)
 
-  // 监听 profile 变化并触发更新
   useEffect(() => {
-    updateSection('profile', debouncedProfile)
-  }, [debouncedProfile, updateSection])
+    if (debouncedProfile) {
+      useResumeStore.getState().updateSection('profile', debouncedProfile)
+    }
+  }, [debouncedProfile])
 
   const handleLabelChange = (key: string) => (newLabel: string) => {
+    console.log('Before label change:', useResumeStore.getState().resumeData?.config?.profile)
     if (config?.fields) {
       const newFields = config.fields.map(field => 
         field.key === key ? { ...field, label: newLabel } : field
@@ -166,15 +179,18 @@ export function ProfileSection({ initialData }: ProfileSectionProps) {
         fields: newFields
       }
       updateConfig('profile', newConfig)
+      console.log('After label change:', useResumeStore.getState().resumeData?.config?.profile)
     }
   }
 
   const handleTitleChange = (newTitle: string) => {
+    console.log('Before title change:', useResumeStore.getState().resumeData?.config?.profile)
     const newConfig = {
       ...config,
       title: newTitle
     }
     updateConfig('profile', newConfig)
+    console.log('After title change:', useResumeStore.getState().resumeData?.config?.profile)
   }
 
   const handleChange = useCallback((field: keyof Profile) => (
@@ -224,35 +240,21 @@ export function ProfileSection({ initialData }: ProfileSectionProps) {
     )
   }
 
-  useEffect(() => {
-    console.log('Config changed:', config)
-  }, [config])
-
-  useEffect(() => {
-    console.log('ResumeData changed:', resumeData)
-  }, [resumeData])
-
-  // 处理配置加载
   const handleLoadConfig = useCallback(async () => {
     try {
-      // TODO: 实现从API加载配置的逻辑
       const response = await fetch(`/api/users/current/configs/profile`)
       const data = await response.json()
       
       if (data.profile) {
-        // 更新全局状态
         updateSection('profile', data.profile)
       }
     } catch (error) {
       console.error('加载配置失败:', error)
-      // TODO: 添加错误提示
     }
   }, [updateSection])
 
-  // 处理配置保存
   const handleSaveConfig = useCallback(async () => {
     try {
-      // TODO: 实现保存配置到API的逻辑
       await fetch(`/api/users/current/configs/profile`, {
         method: 'PUT',
         headers: {
@@ -262,26 +264,39 @@ export function ProfileSection({ initialData }: ProfileSectionProps) {
           profile: resumeData?.profile
         }),
       })
-      // TODO: 添加成功提示
     } catch (error) {
       console.error('保存配置失败:', error)
-      // TODO: 添加错误提示
     }
   }, [resumeData?.profile])
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <EditableLabel
           label={config?.title ?? ""}
           variant="title"
           onSave={handleTitleChange}
+          className={cn(
+            "transition-colors flex-1",
+            !config?.isShow && "text-muted-foreground"
+          )}
         />
-        <ConfigActions
-          section="profile"
-          onLoad={handleLoadConfig}
-          onSave={handleSaveConfig}
-        />
+        <div className="flex items-center gap-4">
+          <Switch
+            checked={config.isShow ?? true}
+            onCheckedChange={handleVisibilityChange}
+            className={cn(
+              "data-[state=checked]:bg-green-500",
+              "data-[state=unchecked]:bg-muted",
+              "transition-colors"
+            )}
+          />
+          <ConfigActions
+            section="profile"
+            onLoad={handleLoadConfig}
+            onSave={handleSaveConfig}
+          />
+        </div>
       </div>
 
       <div className="relative bg-card p-4">
