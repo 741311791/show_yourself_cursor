@@ -36,7 +36,7 @@ const mockAwards: Award[] = [
     level: "国家级",
     issuer: "教育部",
     acquireDate: "2023-06",
-    photo: null,
+    photos: [],
     ranking: "一等奖",
     participants: "10000+",
     customFields: [],
@@ -170,10 +170,10 @@ function AwardList({
                         </div>
 
                         {/* 证书图片 */}
-                        {award.photo ? (
+                        {award.photos.length > 0 ? (
                           <div className="relative flex-1 border-l border-border">
                             <Image
-                              src={award.photo}
+                              src={award.photos[0]}
                               alt={award.name}
                               fill
                               className="object-cover"
@@ -280,7 +280,7 @@ export function AwardTimeline() {
       level: "",
       issuer: "",
       acquireDate: "",
-      photo: null,
+      photos: [],
       ranking: "",
       participants: "",
       customFields: [],

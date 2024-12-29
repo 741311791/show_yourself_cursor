@@ -23,6 +23,7 @@ interface ImageUploadProps {
   height?: number
   tip?: string
   disabled?: boolean
+  overlayClassName?: string
 }
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
@@ -86,7 +87,7 @@ export function ImageUpload({
   }
 
   return (
-    <div className="relative">
+    <div className={cn("relative", className)}>
       <input 
         type="file"
         ref={fileInputRef}
@@ -98,15 +99,11 @@ export function ImageUpload({
 
       <div 
         onClick={() => !disabled && !loading && fileInputRef.current?.click()}
-        className={cn(
-          "relative group cursor-pointer",
-          (disabled || loading) && "opacity-50 cursor-not-allowed",
-          className
-        )}
+        className="relative group cursor-pointer h-full"
       >
         <div 
-          className="relative overflow-hidden bg-muted ring-4 ring-background shadow-lg rounded-lg"
-          style={{ width, height }}
+          className="relative overflow-hidden bg-muted ring-4 ring-background shadow-lg rounded-lg h-full"
+          style={{ aspectRatio: width / height }}
         >
           {value ? (
             <Image
@@ -116,33 +113,31 @@ export function ImageUpload({
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground gap-2">
               <Upload className="h-8 w-8" />
               <span className="text-sm">{tip}</span>
             </div>
           )}
+
+          {/* 上传进度遮罩 */}
+          {loading && (
+            <div className="absolute inset-0 bg-background/50 backdrop-blur-sm rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
+                <div className="text-xs mt-1 text-foreground">{progress}%</div>
+              </div>
+            </div>
+          )}
+
+          {!disabled && !loading && value && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+              <Upload className="h-6 w-6" />
+              <span className="text-sm font-medium">更换图片</span>
+            </div>
+          )}
         </div>
         
-        {/* 上传进度遮罩 */}
-        {loading && (
-          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
-              <div className="text-xs mt-1 text-foreground">{progress}%</div>
-            </div>
-          </div>
-        )}
-
-        {!disabled && !loading && (
-          <div className={cn(
-            "absolute inset-0 flex flex-col items-center justify-center gap-2",
-            "bg-background/80 backdrop-blur-sm text-foreground rounded-lg",
-            "opacity-0 group-hover:opacity-100 transition-opacity"
-          )}>
-            <Upload className="h-6 w-6" />
-            <span className="text-sm font-medium">更换图片</span>
-          </div>
-        )}
+       
       </div>
 
       <AlertDialog open={showError} onOpenChange={setShowError}>

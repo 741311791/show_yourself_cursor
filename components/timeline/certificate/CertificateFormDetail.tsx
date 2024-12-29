@@ -46,7 +46,7 @@ export function CertificateFormDetail({
 }: CertificateFormDetailProps) {
   const [formData, setFormData] = useState<Certificate>(certificate)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(certificate.photo)
+  const [preview, setPreview] = useState<string | null>(certificate.photos[0])
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean

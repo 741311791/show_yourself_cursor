@@ -6,7 +6,7 @@ import {
   Edit2, Save,
   Trophy, Calendar, Medal,
   FileText, Camera, Building,
-  Users, Crown
+  Users, Crown, X
 } from "lucide-react"
 import { Award } from "@/types/award"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Alert } from "@/components/shared/Alert"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
+import { PhotoUploader } from "@/components/timeline/shared/PhotoUploader"
 
 const container = {
   hidden: { opacity: 0 },
@@ -47,7 +48,6 @@ export function AwardFormDetail({
 }: AwardFormDetailProps) {
   const [formData, setFormData] = useState<Award>(award)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(award.photos[0])
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean
@@ -59,7 +59,7 @@ export function AwardFormDetail({
     message: ''
   })
 
-  const handleInputChange = (field: keyof Award, value: string) => {
+  const handleInputChange = (field: keyof Award, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -251,28 +251,14 @@ export function AwardFormDetail({
 
       {/* 证书图片 */}
       <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 pb-2">
-            <Camera className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">证书图片</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              上传获奖证书图片，该图片将展示在获奖记录封面和Web简历中。
-            </p>
-            <div className="flex justify-center">
-              <ImageUpload
-                value={preview}
-                onChange={(url) => {
-                  setPreview(url)
-                  handleInputChange('photo', url)
-                }}
-                disabled={!isEditing}
-                tip="点击上传证书图片"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <PhotoUploader
+          title="证书图片"
+          description="上传获奖证书图片，这些图片将展示在获奖记录中。"
+          photos={formData.photos}
+          onChange={(photos) => handleInputChange('photos', photos)}
+          isEditing={isEditing}
+          maxPhotos={6}
+        />
       </motion.div>
 
       {/* 保存/编辑按钮 */}

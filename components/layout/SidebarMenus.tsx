@@ -48,7 +48,7 @@ interface MenuItem {
 const timelineMenuItems: MenuItem[] = [
   {
     icon: History,
-    label: "简历配置",
+    label: "个人履历",
     href: "/timeline",
     subItems: [
       { icon: User, label: "个人信息", href: "/timeline/profile" },
@@ -151,9 +151,9 @@ export function SidebarMenus() {
   const [openMenus, setOpenMenus] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebarOpenMenus')
-      return saved ? JSON.parse(saved) : ['简历管理', '简历配置']
+      return saved ? JSON.parse(saved) : ['简历管理', '个人履历']
     }
-    return ['简历管理', '简历配置']
+    return ['简历管理', '个人履历']
   })
 
   const [customBlockDialogOpen, setCustomBlockDialogOpen] = useState(false)
@@ -409,8 +409,8 @@ export function SidebarMenus() {
           <p className="text-xs font-medium text-muted-foreground px-4 mb-2">
             简历管理
           </p>
-          {allTimelineMenuItems.map(renderMenuItem)}
           {resumeMenuItems.map(renderMenuItem)}
+          {allTimelineMenuItems.map(renderMenuItem)}
         </div>
 
         {/* 支持 */}
