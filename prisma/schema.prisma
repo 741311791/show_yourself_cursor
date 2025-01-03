@@ -51,12 +51,13 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   lastLoginAt DateTime?
+
 }
 
 
 model Profile {
   id           String   @id @default(cuid())
-  userId       String
+  userId       String  
   name         String?
   birthday     String?
   gender       String?

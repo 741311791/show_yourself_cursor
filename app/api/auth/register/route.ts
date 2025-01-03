@@ -29,6 +29,7 @@ export async function POST(req: Request) {
         email,
         username,
         password: hashedPassword,
+        salt: '',
         role: 'COMMON_USER',
         status: 'ACTIVE'
       }

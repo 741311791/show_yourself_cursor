@@ -3,8 +3,9 @@ import GithubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { AuthOptions } from 'next-auth'
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID!,
@@ -60,6 +61,7 @@ const handler = NextAuth({
     signIn: '/auth/login',
     error: '/auth/error',
   }
-})
+}
 
+const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST } 

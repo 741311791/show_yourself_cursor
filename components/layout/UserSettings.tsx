@@ -1,8 +1,8 @@
 "use client"
 
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { useTheme } from 'next-themes'
+import { useSession, signOut } from 'next-auth/react'
 import { 
   Settings, LogOut, User as UserIcon,
   Moon, Sun
@@ -14,25 +14,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from "@/lib/utils"
-
-interface User {
-  name: string
-  avatar: string
-}
-
-const mockUser: User = {
-  name: "张三",
-  avatar: "https://picsum.photos/200"
-}
 
 export function UserSettings() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
+  const { data: session } = useSession()
 
-  const handleLogout = () => {
-    console.log('调用登出 API')
-    // TODO: 实现登出逻辑
+  const handleLogout = async () => {
+    await signOut({ redirect: false })
+    router.push('/')
+  }
+
+  if (!session?.user) {
+    return null
   }
 
   return (
@@ -55,19 +51,33 @@ export function UserSettings() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="h-9 w-9 p-0"
+              className="relative h-10 w-10 rounded-full p-0.5 ring-2 ring-primary/10 transition-all hover:ring-4 hover:ring-primary/20"
             >
-              <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                <Image
-                  src={mockUser.avatar}
-                  alt={mockUser.name}
-                  fill
+              <Avatar className="h-full w-full rounded-full border-2 border-background">
+                <AvatarImage 
+                  src={session.user.image || ''} 
                   className="object-cover"
                 />
-              </div>
+                <AvatarFallback className="bg-primary/5 text-primary">
+                  {session.user.name?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-background bg-green-500" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-36">
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="flex items-center gap-2 p-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={session.user.image || ''} />
+                <AvatarFallback>
+                  {session.user.name?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col space-y-0.5">
+                <p className="text-sm font-medium">{session.user.name}</p>
+                <p className="text-xs text-muted-foreground">{session.user.email}</p>
+              </div>
+            </div>
             <DropdownMenuItem onClick={() => router.push('/settings#profile')}>
               <UserIcon className="mr-2 h-4 w-4" />
               <span>个人信息</span>

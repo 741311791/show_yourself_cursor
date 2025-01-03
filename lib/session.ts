@@ -1,11 +1,48 @@
-import { prisma } from './prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { prisma } from '@/lib/prisma'
 
 export async function getCurrentUser() {
-  // TODO: 实现实际的用户认证逻辑
-  // 现在先返回测试用户
-  const user = await prisma.user.findUnique({
-    where: { email: 'test@example.com' }
-  })
+  try {
+    const session = await getServerSession(authOptions)
+    console.log('session', session)
+    if (!session?.user?.id) {
+      return null
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        status: true
+      }
+    })
+    console.log('user', user)
+
+    return user
+  } catch (error) {
+    console.error('Get current user error:', error)
+    return null
+  }
+}
+
+export async function requireAuth() {
+  const user = await getCurrentUser()
+  
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
   
   return user
+}
+
+export async function checkAuth() {
+  const user = await getCurrentUser()
+  return {
+    isAuthenticated: !!user,
+    user
+  }
 } 

@@ -1,7 +1,7 @@
 import { CustomField } from "./shared"
 
 export interface Profile {
-  id: string
+  id?: string
   name: string
   avatar?: string
   email: string
@@ -14,3 +14,16 @@ export interface Profile {
   summary: string
   customFields: CustomField[]
 } 
+
+export const defaultProfile: Profile = {
+  name: "",
+  email: "",
+  phone: "",
+  birthday: "",
+  location: "",
+  title: "",
+  website: "",
+  customFields: [],
+  summary: "",
+  avatar: ""
+}

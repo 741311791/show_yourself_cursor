@@ -15,8 +15,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { Alert } from "@/components/shared/Alert"
-import { Profile } from "@/types/profile"
+import { Profile, defaultProfile } from "@/types/profile"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
+import { v4 as uuidv4 } from 'uuid'
 
 // 动画配置
 const container = {
@@ -34,20 +35,6 @@ const item = {
   show: { opacity: 1, y: 0 }
 }
 
-const mockProfile: Profile = {
-  id: "1",
-  name: "示例用户",
-  email: "example@email.com",
-  phone: "13800138000",
-  birthday: "1990-01-01",
-  location: "北京市",
-  title: "前端开发工程师",
-  website: "https://example.com",
-  customFields: [],
-  summary: "这是一段示例的个人简介...",
-  avatar: ""
-}
-
 export function ProfileForm() {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -55,7 +42,7 @@ export function ProfileForm() {
   const [error, setError] = useState<string | null>(null)
   const [alertState, setAlertState] = useState<{
     show: boolean
-    type: 'success' | 'error'
+    type: 'success' | 'error' | 'info'
     message: string
   }>({
     show: false,
@@ -64,19 +51,7 @@ export function ProfileForm() {
   })
   
   // 表单数据状态
-  const [profile, setProfile] = useState<Profile>({
-    id: "",
-    name: "",
-    email: "",
-    phone: "",
-    birthday: "",
-    location: "",
-    title: "",
-    website: "",
-    customFields: [],
-    summary: "",
-    avatar: ""
-  })
+  const [profile, setProfile] = useState<Profile>(defaultProfile)
 
   // 获取个人信息
   useEffect(() => {
@@ -85,22 +60,25 @@ export function ProfileForm() {
         setIsLoading(true)
         setError(null)
         
-        // TODO: 替换为实际的 API 调用
-        // const response = await fetch('/api/profile')
-        // const data = await response.json()
+        const response = await fetch('/api/profile')
+        if (!response.ok) {
+          throw new Error('获取个人信息失败')
+        }
         
-        // 模拟 API 调用
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        const data: Profile | null = null
+        const data = await response.json()
+        setProfile(data || defaultProfile)
 
-        // 如果返回的数据为空，使用 mock 数据
-        setProfile(data || mockProfile)
-        setIsEditing(!data) // 如果是新用户（没有数据），自动进入编辑模式
+        // 根据不同情况显示不同提示
+        if (data) {
+          showAlert('success', '成功获取用户信息')
+        } else {
+          showAlert('info', '当前用户基本信息为空，快来添加吧~')
+          setIsEditing(true) // 自动进入编辑模式
+        }
       } catch (error) {
         console.error('获取个人信息失败:', error)
         setError('获取个人信息失败，请刷新页面重试')
-        // 发生错误时也使用 mock 数据
-        setProfile(mockProfile)
+        showAlert('error', '获取个人信息失败，请刷新页面重试')
       } finally {
         setIsLoading(false)
       }
@@ -112,7 +90,21 @@ export function ProfileForm() {
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profile),
+      })
+
+      if (!response.ok) {
+        throw new Error('保存失败')
+      }
+
+      const updatedProfile = await response.json()
+      setProfile(updatedProfile)
       setIsEditing(false)
       showAlert('success', '保存成功')
     } catch (error) {
@@ -133,7 +125,7 @@ export function ProfileForm() {
       customFields: [
         ...prev.customFields,
         {
-          id: Math.random().toString(),
+          id: uuidv4(),
           title: "",
           content: "",
           icon: 'FileText'
@@ -158,7 +150,7 @@ export function ProfileForm() {
     }))
   }
 
-  const showAlert = (type: 'success' | 'error', message: string) => {
+  const showAlert = (type: 'success' | 'error' | 'info', message: string) => {
     setAlertState({ show: true, type, message })
     setTimeout(() => {
       setAlertState(prev => ({ ...prev, show: false }))
@@ -184,6 +176,13 @@ export function ProfileForm() {
       animate="show"
       variants={container}
     >
+      {/* Alert 组件 */}
+      <Alert
+        show={alertState.show}
+        type={alertState.type}
+        message={alertState.message}
+      />
+
       {/* 如果有错误，显示错误提示 */}
       {error && (
         <motion.div variants={item}>
@@ -222,7 +221,7 @@ export function ProfileForm() {
                   value={profile.name}
                   onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
                   disabled={!isEditing}
-                  placeholder="请���入姓名"
+                  placeholder="请输入姓名"
                 />
               </div>
 
@@ -345,7 +344,7 @@ export function ProfileForm() {
           disabled={isSaving}
           className={cn(
             "shadow-lg",
-            isEditing ? "bg-primary hover:bg-primary/90" : "bg-secondary hover:bg-secondary/90"
+            isEditing ? "bg-primary hover:bg-primary/90" : "bg-gradient-to-r from-[#4F46E5] to-[#7C3AED]"
           )}
         >
           {isEditing ? (
@@ -361,13 +360,6 @@ export function ProfileForm() {
           )}
         </Button>
       </motion.div>
-
-      {/* Alert 组件 */}
-      <Alert
-        show={alertState.show}
-        type={alertState.type}
-        message={alertState.message}
-      />
     </motion.div>
   )
 } 

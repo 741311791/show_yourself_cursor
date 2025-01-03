@@ -5,34 +5,23 @@ import { CheckCircle2, XCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface AlertProps {
-  type: 'success' | 'error'
-  message: string
   show: boolean
+  type: 'success' | 'error' | 'info'
+  message: string
 }
 
-export function Alert({ type, message, show }: AlertProps) {
+export function Alert({ show, type, message }: AlertProps) {
+  if (!show) return null
+
+  const styles = {
+    success: 'bg-green-100 text-green-800 border-green-300',
+    error: 'bg-red-100 text-red-800 border-red-300',
+    info: 'bg-blue-100 text-blue-800 border-blue-300'
+  }
+
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
-        >
-          <div className={cn(
-            "px-4 py-2 rounded-lg shadow-lg flex items-center gap-2",
-            type === 'success' ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
-          )}>
-            {type === 'success' ? (
-              <CheckCircle2 className="h-5 w-5" />
-            ) : (
-              <XCircle className="h-5 w-5" />
-            )}
-            <span className="font-medium">{message}</span>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg border ${styles[type]} shadow-lg transition-all duration-300`}>
+      {message}
+    </div>
   )
 } 
