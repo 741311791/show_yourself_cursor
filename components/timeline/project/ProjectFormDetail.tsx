@@ -1,12 +1,13 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { motion } from "motion/react"
 import { 
-  FileText, MapPin, Calendar, Code, Star,
-  Save, Edit2, Camera
+  FileText, MapPin, Calendar, Code,
+  Save, Edit2, Briefcase
 } from "lucide-react"
 import { Project } from "@/types/project"
+import { Work } from "@/types/work"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,9 +15,16 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Alert } from "@/components/shared/Alert"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
+import { PhotoUploader } from "@/components/timeline/shared/PhotoUploader"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const container = {
   hidden: { opacity: 0 },
@@ -46,8 +54,8 @@ export function ProjectFormDetail({
 }: ProjectFormDetailProps) {
   const [formData, setFormData] = useState<Project>(project)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(project.photo ?? null)
   const [isSaving, setIsSaving] = useState(false)
+  const [works, setWorks] = useState<Work[]>([])
   const [alertState, setAlertState] = useState<{
     show: boolean
     type: 'success' | 'error'
@@ -58,16 +66,48 @@ export function ProjectFormDetail({
     message: ''
   })
 
-  const handleInputChange = (field: keyof Project, value: string | boolean) => {
+  // 获取工作经历列表
+  useEffect(() => {
+    const fetchWorks = async () => {
+      try {
+        const response = await fetch('/api/work')
+        if (!response.ok) {
+          throw new Error('获取工作经历失败')
+        }
+        const data = await response.json()
+        setWorks(data)
+      } catch (error) {
+        console.error('获取工作经历失败:', error)
+        showAlert('error', '获取工作经历失败')
+      }
+    }
+
+    fetchWorks()
+  }, [])
+
+  const handleInputChange = (field: keyof Project, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      // TODO: 调用更新项目 API
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      onSave(formData)
+      
+      const response = await fetch(`/api/project/${formData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+        cache: 'no-store'
+      })
+
+      if (!response.ok) {
+        throw new Error('更新项目经历失败')
+      }
+
+      const savedProject = await response.json()
+      onSave(savedProject)
       setIsEditing(false)
       showAlert('success', '保存成功')
     } catch (error) {
@@ -96,6 +136,7 @@ export function ProjectFormDetail({
       animate="show"
       variants={container}
     >
+      {/* 返回按钮 */}
       <motion.div variants={item}>
         <Button
           variant="ghost"
@@ -129,15 +170,36 @@ export function ProjectFormDetail({
 
             <div className="col-span-2 space-y-2">
               <Label className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                所属公司
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                关联工作经历
               </Label>
-              <Input
-                value={formData.company}
-                onChange={(e) => handleInputChange('company', e.target.value)}
+              <Select
+                value={formData.workId ?? ""}
+                onValueChange={(value) => {
+                  const work = works.find(w => w.id === value)
+                  handleInputChange('workId', value)
+                  handleInputChange('company', work?.company ?? '')
+                }}
                 disabled={!isEditing}
-                placeholder="请输入所属公司"
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="选择关联的工作经历" />
+                </SelectTrigger>
+                <SelectContent>
+                  {works.map((work) => (
+                    <SelectItem key={work.id} value={work.id ?? ""}>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <div className="font-medium">{work.company}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {work.position} | {work.startDate} - {work.endDate}
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -192,24 +254,6 @@ export function ProjectFormDetail({
                 className="min-h-[100px]"
               />
             </div>
-
-            {/* 核心项目标记 */}
-            {formData.source === 'custom' && (
-              <div className="col-span-2 flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => handleInputChange('isCore', !formData.isCore)}
-                  disabled={!isEditing}
-                  className={cn(
-                    "gap-2",
-                    formData.isCore && "text-primary border-primary hover:text-primary hover:border-primary"
-                  )}
-                >
-                  <Star className="h-4 w-4" />
-                  {formData.isCore ? "取消核心项目" : "标记为核心项目"}
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
       </motion.div>
@@ -217,7 +261,7 @@ export function ProjectFormDetail({
       {/* 自定义信息 */}
       <motion.div variants={item}>
         <CustomFieldsSection 
-          fields={formData.customFields}
+          fields={formData.customFields ?? []}
           onFieldsChange={(fields) => setFormData(prev => ({ ...prev, customFields: fields }))}
           disabled={!isEditing}
           isEditing={isEditing}
@@ -230,45 +274,24 @@ export function ProjectFormDetail({
             }
             setFormData(prev => ({
               ...prev,
-              customFields: [...prev.customFields, newField]
+              customFields: [...(prev.customFields ?? []), newField]
             }))
           }}
           onRemove={(id) => {
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.filter(field => field.id !== id)
+              customFields: prev.customFields?.filter(field => field.id !== id) ?? []
             }))
           }}
           onUpdate={(id, field, value) => {
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.map(item => 
+              customFields: prev.customFields?.map(item => 
                 item.id === id ? { ...item, [field]: value } : item
-              )
+              ) ?? []
             }))
           }}
         />
-      </motion.div>
-
-      {/* 项目成果 */}
-      <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 pb-2">
-            <Star className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">项目成果</h2>
-          </CardHeader>
-          <CardContent>
-            <AIRichTextEditor
-              content={formData.achievement}
-              onChange={(html) => handleInputChange('achievement', html)}
-              isEditing={isEditing}
-              onAIGenerate={async () => {
-                // TODO: 实现 AI 生成��能
-                console.log('AI 生成项目成果')
-              }}
-            />
-          </CardContent>
-        </Card>
       </motion.div>
 
       {/* 项目总结 */}
@@ -284,7 +307,6 @@ export function ProjectFormDetail({
               onChange={(html) => handleInputChange('summary', html)}
               isEditing={isEditing}
               onAIGenerate={async () => {
-                // TODO: 实现 AI 生成功能
                 console.log('AI 生成项目总结')
               }}
             />
@@ -294,38 +316,18 @@ export function ProjectFormDetail({
 
       {/* 项目图片 */}
       <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 pb-2">
-            <Camera className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">项目图片</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              上传一张与���项目相关的照片，可以是项目截图或效果图等。该照片将展示在项目列表和Web简历中。
-            </p>
-            <div className="flex justify-center">
-              <ImageUpload
-                value={preview}
-                onChange={(url) => {
-                  setPreview(url)
-                  handleInputChange('photo', url)
-                }}
-                disabled={!isEditing}
-                tip="点击上传项目图片"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <PhotoUploader
+          title="项目图片"
+          description="上传与该项目相关的照片，可以是项目截图或效果图等。第一张照片将作为封面展示。"
+          photos={formData.photos ?? []}
+          onChange={(photos) => handleInputChange('photos', photos)}
+          isEditing={isEditing}
+          maxPhotos={5}
+        />
       </motion.div>
 
       {/* 保存/编辑按钮 */}
-      <motion.div 
-        variants={item}
-        className="fixed bottom-8 right-8 z-10"
-        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
+      <motion.div variants={item} className="fixed bottom-8 right-8 z-10">
         <Button
           onClick={isEditing ? handleSave : handleEdit}
           disabled={isSaving}

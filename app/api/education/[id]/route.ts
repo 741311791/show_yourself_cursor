@@ -10,20 +10,20 @@ export async function GET(
     const user = await requireAuth()
     const { id } = await context.params
 
-    const profile = await prisma.profile.findUnique({
+    const education = await prisma.education.findUnique({
       where: {
         id,
         userId: user.id
       }
     })
 
-    if (!profile) {
-      return new NextResponse('Profile not found', { status: 404 })
+    if (!education) {
+      return new NextResponse('Education not found', { status: 404 })
     }
 
-    return NextResponse.json(profile)
+    return NextResponse.json(education)
   } catch (error) {
-    console.error('Get profile error:', error)
+    console.error('Get education error:', error)
     return new NextResponse('Unauthorized', { status: 401 })
   }
 }
@@ -37,7 +37,7 @@ export async function PUT(
     const { id } = await context.params
     const data = await req.json()
 
-    const profile = await prisma.profile.update({
+    const education = await prisma.education.update({
       where: {
         id,
         userId: user.id
@@ -45,9 +45,9 @@ export async function PUT(
       data
     })
 
-    return NextResponse.json(profile)
+    return NextResponse.json(education)
   } catch (error) {
-    console.error('Update profile error:', error)
+    console.error('Update education error:', error)
     return new NextResponse('Internal error', { status: 500 })
   }
 }
@@ -60,7 +60,7 @@ export async function DELETE(
     const user = await requireAuth()
     const { id } = await context.params
 
-    await prisma.profile.delete({
+    await prisma.education.delete({
       where: {
         id,
         userId: user.id
@@ -69,7 +69,7 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    console.error('Delete profile error:', error)
+    console.error('Delete education error:', error)
     return new NextResponse('Internal error', { status: 500 })
   }
 } 

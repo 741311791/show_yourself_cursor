@@ -40,6 +40,7 @@ enum PublicationType {
   OTHER
 }
 
+
 model User {
   id          String    @id @default(cuid())
   username    String
@@ -80,8 +81,8 @@ model Education {
   userId      String
   school      String
   degree      String?
-  startDate   DateTime
-  endDate     DateTime?
+  startDate   String?
+  endDate     String?
   gpa         String?
   location    String?
   courses     String?
@@ -103,8 +104,8 @@ model SchoolExperience {
   name         String                // 活动/项目名称
   organization String                // 组织/社团名称
   role         String                // 担任角色
-  startDate    DateTime
-  endDate      DateTime?
+  startDate    String?
+  endDate      String?
   description  String?               // 详细描述
   achievement  String?               // 成就/获奖
   isCore       Boolean?              // 是否为核心经历
@@ -125,8 +126,8 @@ model Work {
   company     String
   title       String
   location    String?
-  startDate   DateTime
-  endDate     DateTime?
+  startDate   String?
+  endDate     String?
   position    String?
   photos      String[]
   summary     String?
@@ -144,12 +145,11 @@ model Project {
   name        String
   company     String? 
   role        String?
-  startDate   DateTime
-  endDate     DateTime?
+  startDate   String?
+  endDate     String?
   description String?
   techStack   String?
-  achievements String?
-  isCore      Boolean?
+  achievement String?
   photos      String[]
   summary     String?
   customFields Json[]   // CustomField[]
@@ -165,7 +165,7 @@ model Skill {
   name        String
   category    String?
   level       Int?
-  certDate    DateTime?
+  certDate    String?
   certName    String?
   certOrg     String?
   photos      String[]
@@ -182,7 +182,7 @@ model SkillPortfolio {
   userId      String
   skillId     String
   name        String
-  date        DateTime
+  date        String?
   description String?
   photos      String[]
   summary     String?
@@ -199,7 +199,7 @@ model Award {
   name        String
   level       String?
   issuer      String?
-  acquireDate DateTime
+  acquireDate String?
   photos      String[]
   ranking     String?
   participants String?
@@ -217,8 +217,8 @@ model Research {
   direction   String
   institution String
   role        String
-  startDate   DateTime
-  endDate     DateTime?
+  startDate   String?
+  endDate     String?
   photos      String[]
   summary     String?
   customFields Json[]   // CustomField[]
@@ -234,7 +234,7 @@ model ResearchResult {
   type        ResearchResultType
   name        String
   role        String
-  date        DateTime
+  date        String?
   summary     String?
   customFields Json[]   // CustomField[]
   createdAt   DateTime @default(now())
@@ -248,7 +248,7 @@ model Certificate {
   userId      String
   name        String
   issuer      String
-  date        DateTime
+  date        String?
   level       String?
   number      String?
   photos      String[]
@@ -267,10 +267,10 @@ model Language {
   name        String
   level       String
   certificate String?
-  acquireDate DateTime?
+  acquireDate String?
   photos      String[]
   score       String?
-  validPeriod DateTime?
+  validPeriod String?
   summary     String?
   customFields Json[]   // CustomField[]
   createdAt   DateTime @default(now())
@@ -286,7 +286,7 @@ model Hobby {
   cover       String?
   photos      String[]
   description String?
-  startDate   DateTime
+  startDate   String?
   summary     String?
   customFields Json[]   // CustomField[]
   createdAt   DateTime @default(now())
@@ -300,7 +300,7 @@ model Publication {
   userId      String
   name        String
   type        PublicationType
-  publishDate DateTime
+  publishDate String?
   journal     String?
   database    String?
   photos      String[]

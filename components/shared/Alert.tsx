@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from "motion/react"
-import { CheckCircle2, XCircle } from "lucide-react"
+import { CheckCircle2, XCircle, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface AlertProps {
@@ -11,17 +11,40 @@ interface AlertProps {
 }
 
 export function Alert({ show, type, message }: AlertProps) {
-  if (!show) return null
+  const icons = {
+    success: <CheckCircle2 className="h-5 w-5" />,
+    error: <XCircle className="h-5 w-5" />,
+    info: <Info className="h-5 w-5" />
+  }
 
   const styles = {
-    success: 'bg-green-100 text-green-800 border-green-300',
-    error: 'bg-red-100 text-red-800 border-red-300',
-    info: 'bg-blue-100 text-blue-800 border-blue-300'
+    success: 'bg-green-50 text-green-600 border-green-200',
+    error: 'bg-red-50 text-red-600 border-red-200',
+    info: 'bg-blue-50 text-blue-600 border-blue-200'
   }
 
   return (
-    <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg border ${styles[type]} shadow-lg transition-all duration-300`}>
-      {message}
-    </div>
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.2 }}
+          className="fixed top-4 right-4 z-50"
+        >
+          <div 
+            className={cn(
+              "flex items-center gap-2 px-4 py-3 rounded-lg border shadow-lg",
+              "backdrop-blur-sm bg-opacity-95",
+              styles[type]
+            )}
+          >
+            {icons[type]}
+            <span className="font-medium text-sm">{message}</span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
-} 
+}

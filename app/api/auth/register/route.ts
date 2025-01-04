@@ -36,12 +36,11 @@ export async function POST(req: Request) {
     })
 
     return new NextResponse('注册成功', { status: 201 })
-  } catch (error: any) {
-    console.error('Registration error:', error)
-    // 返回具体的错误信息
-    return new NextResponse(
-      error.message || 'Internal server error', 
-      { status: error.status || 500 }
-    )
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Registration error:', error)
+      return new NextResponse(error.message, { status: 400 })
+    }
+    return new NextResponse('注册失败', { status: 500 })
   }
 } 

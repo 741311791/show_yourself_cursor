@@ -3,30 +3,13 @@
 import React, { useState, useMemo, useEffect } from "react"
 import { Plus, FileText, MapPin, Calendar, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
-import { Project } from "@/types/project"
+import { Project, defaultProject } from "@/types/project"
 import { ProjectFormDetail } from "./ProjectFormDetail"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { TimelineList, type TimelineItem } from "../shared/TimelineList"
-
-const mockProjects: Project[] = [
-  {
-    id: "1",
-    name: "示例项目",
-    company: "示例公司",
-    startDate: "2023-01",
-    endDate: "2023-12",
-    description: "这是一个示例项目描述",
-    techStack: "React, TypeScript, Tailwind CSS",
-    achievement: "<p>这是项目中的个人成绩</p>",
-    isCore: true,
-    order: 0,
-    source: 'custom',
-    summary: "",
-    photo: null,
-    customFields: []
-  }
-]
+import { Alert } from "@/components/shared/Alert"
+import { v4 as uuidv4 } from "uuid"
 
 export function ProjectTimeline() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -35,19 +18,46 @@ export function ProjectTimeline() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [alertState, setAlertState] = useState<{
+    show: boolean
+    type: 'success' | 'error' | 'info'
+    message: string
+  }>({
+    show: false,
+    type: 'success',
+    message: ''
+  })
+
+  const showAlert = (type: 'success' | 'error' | 'info', message: string) => {
+    setAlertState({ show: true, type, message })
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         setIsLoading(true)
         setError(null)
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        const data: Project[] = []
-        setProjects(data.length > 0 ? data : mockProjects)
+        
+        const response = await fetch('/api/project')
+        if (!response.ok) {
+          throw new Error('获取项目经历失败')
+        }
+        
+        const data = await response.json()
+        setProjects(data)
+
+        if (data.length === 0) {
+          showAlert('info', '暂无项目经历，快来添加吧~')
+        } else {
+          showAlert('success', '成功获取项目经历')
+        }
       } catch (error) {
         console.error('获取项目经历失败:', error)
         setError('获取项目经历失败，请刷新页面重试')
-        setProjects(mockProjects)
+        showAlert('error', '获取项目经历失败，请刷新页面重试')
       } finally {
         setIsLoading(false)
       }
@@ -64,41 +74,74 @@ export function ProjectTimeline() {
     })
   }, [projects])
 
-  const handleAddProject = () => {
-    const newProject: Project = {
-      id: Math.random().toString(),
-      name: "",
-      company: "",
-      startDate: "",
-      endDate: "",
-      description: "",
-      techStack: "",
-      achievement: "",
-      isCore: false,
-      order: projects.length,
-      source: 'custom',
-      summary: "",
-      photo: null,
-      customFields: []
+  const handleAddProject = async () => {
+    try {
+      const response = await fetch('/api/project', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(defaultProject),
+      })
+
+      if (!response.ok) {
+        throw new Error('创建项目经历失败')
+      }
+
+      const newProject = await response.json()
+      setProjects(prev => [...prev, newProject])
+      setSelectedId(newProject.id)
+      showAlert('success', '已创建新的项目经历')
+    } catch (error) {
+      console.error('创建项目经历失败:', error)
+      showAlert('error', '创建项目经历失败，请重试')
     }
-    setProjects(prev => [...prev, newProject])
-    setSelectedId(newProject.id)
   }
 
-  const handleSaveProject = (updatedProject: Project) => {
-    setProjects(prev => 
-      prev.map(project => project.id === selectedId ? updatedProject : project)
-    )
+  const handleSaveProject = async (updatedProject: Project) => {
+    try {
+      const response = await fetch(`/api/project/${updatedProject.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedProject),
+      })
+
+      if (!response.ok) {
+        throw new Error('更新项目经历失败')
+      }
+
+      const savedProject = await response.json()
+      setProjects(prev => 
+        prev.map(project => project.id === selectedId ? savedProject : project)
+      )
+      setSelectedId(null)
+      showAlert('success', '保存成功')
+    } catch (error) {
+      console.error('更新项目经历失败:', error)
+      showAlert('error', '保存失败，请重试')
+    }
   }
 
   const handleDelete = async (id: string) => {
     try {
       setIsDeleting(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const response = await fetch(`/api/project/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('删除项目经历失败')
+      }
+
       setProjects(prev => prev.filter(project => project.id !== id))
       setDeleteId(null)
+      showAlert('success', '删除成功')
     } catch (error) {
       console.error('删除失败:', error)
+      showAlert('error', '删除失败，请重试')
     } finally {
       setIsDeleting(false)
     }
@@ -106,9 +149,9 @@ export function ProjectTimeline() {
 
   const timelineItems: TimelineItem[] = useMemo(() => {
     return sortedProjects.map(project => ({
-      id: project.id,
+      id: project.id ?? "",
       title: project.name,
-      cover: project.photo,
+      cover: project.photos?.[0] ?? null,
       details: [
         {
           icon: MapPin,
@@ -174,6 +217,12 @@ export function ProjectTimeline() {
 
   return (
     <>
+      <Alert
+        show={alertState.show}
+        type={alertState.type}
+        message={alertState.message}
+      />
+
       <TimelineList 
         items={timelineItems}
         icon={FileText}

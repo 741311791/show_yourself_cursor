@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 export async function getCurrentUser() {
   try {
     const session = await getServerSession(authOptions)
-    console.log('session', session)
+    // console.log('session', session)
     if (!session?.user?.id) {
       return null
     }
@@ -20,7 +20,7 @@ export async function getCurrentUser() {
         status: true
       }
     })
-    console.log('user', user)
+    // console.log('user', user)
 
     return user
   } catch (error) {

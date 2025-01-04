@@ -5,8 +5,7 @@ import { motion } from "motion/react"
 import { 
   Edit2, Save,
   GraduationCap, MapPin, Calendar,
-  Book, Library, Award, FileText,
-  Camera
+  Book, Library, Award, FileText
 } from "lucide-react"
 import { Education } from "@/types/education"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
@@ -15,9 +14,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Alert } from "@/components/shared/Alert"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
+import { PhotoUploader } from "@/components/timeline/shared/PhotoUploader"
 
 // 动画变体配置
 const container = {
@@ -48,7 +47,6 @@ export function EducationFormDetail({
 }: EducationFormDetailProps) {
   const [formData, setFormData] = useState<Education>(education)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(education.photo ?? null)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean
@@ -60,20 +58,37 @@ export function EducationFormDetail({
     message: ''
   })
 
-  const handleInputChange = (field: keyof Education, value: string) => {
+  const handleInputChange = (field: keyof Education, value: Education[keyof Education]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      // TODO: 调用更新教育经历 API
-      // const response = await updateEducation(formData)
-      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      onSave(formData)  // 只更新数据
-      setIsEditing(false)  // 切换到查看模式
-      showAlert('success', '保存成功')
+      const apiUrl = formData.id 
+        ? `/api/education/${formData.id}`
+        : '/api/education'
+      
+      const response = await fetch(apiUrl, {
+        method: formData.id ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          photos: formData.photos ?? []
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('保存失败')
+      }
+
+      const savedEducation = await response.json()
+      onSave(savedEducation)
+      setIsEditing(false)
+      showAlert('success', formData.id ? '更新成功' : '创建成功')
     } catch (error) {
       console.error('保存失败:', error)
       showAlert('error', '保存失败，请重试')
@@ -291,28 +306,12 @@ export function EducationFormDetail({
 
       {/* 照片上传 */}
       <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 pb-2">
-            <Camera className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">相关照片</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              上传一张与该教育经历相关的照片，可以是学校照片或毕业照等。该照片将展示在教育经历封面和Web简历中。
-            </p>
-            <div className="flex justify-center">
-              <ImageUpload
-                value={preview}
-                onChange={(url) => {
-                  setPreview(url)
-                  handleInputChange('photo', url)
-                }}
-                disabled={!isEditing}
-                tip="点击上传照片"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <PhotoUploader
+          photos={formData.photos ?? []}
+          onChange={(photos) => handleInputChange('photos', photos)}
+          isEditing={isEditing}
+          maxPhotos={5}
+        />
       </motion.div>
 
       {/* 保存/编辑按钮 */}

@@ -19,14 +19,10 @@ import {
 } from "@dnd-kit/sortable"
 import { 
   Briefcase, MapPin, Calendar,
-  FileText, Save, Edit2,
-  Camera, Plus
+  FileText, Save, Edit2
 } from "lucide-react"
 import { Work } from "@/types/work"
-import { Project } from "@/types/project"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
-import { ProjectItem } from "./ProjectItem"
-import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -35,6 +31,9 @@ import { cn } from "@/lib/utils"
 import { Alert } from "@/components/shared/Alert"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
 import { CustomField } from "@/types/shared"
+import { PhotoUploader } from "@/components/timeline/shared/PhotoUploader"
+import { v4 as uuidv4 } from "uuid"
+
 
 const container = {
   hidden: { opacity: 0 },
@@ -64,7 +63,6 @@ export function WorkFormDetail({
 }: WorkFormDetailProps) {
   const [formData, setFormData] = useState<Work>(work)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(work.photo)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean
@@ -76,17 +74,29 @@ export function WorkFormDetail({
     message: ''
   })
 
-  const handleInputChange = (field: keyof Work, value: string) => {
+  const handleInputChange = (field: keyof Work, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      // TODO: 调用更新工作经历 API
-      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      onSave(formData)
+      const response = await fetch(`/api/work/${formData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+        cache: 'no-store'
+      })
+
+      if (!response.ok) {
+        throw new Error('更新工作经历失败')
+      }
+
+      const savedWork = await response.json()
+      onSave(savedWork)
       setIsEditing(false)
       showAlert('success', '保存成功')
     } catch (error) {
@@ -101,87 +111,6 @@ export function WorkFormDetail({
     setIsEditing(true)
   }
 
-  // 项目相关处理函数
-  const addProject = () => {
-    const newProject: Project = {
-      id: Math.random().toString(),
-      name: "",
-      role: "",
-      company: "",
-      source: "custom",
-      startDate: "",
-      endDate: "",
-      summary: "",
-      techStack: "",
-      description: "",
-      achievement: "",
-      isCore: false,
-      order: formData.projects.length,
-      customFields: []
-    }
-    setFormData(prev => ({
-      ...prev,
-      projects: [...prev.projects, newProject]
-    }))
-  }
-
-  const updateProject = (id: string, field: keyof Project, value: string | boolean | CustomField[]) => {
-    setFormData(prev => ({
-      ...prev,
-      projects: prev.projects.map(project => 
-        project.id === id ? { ...project, [field]: value } : project
-      )
-    }))
-  }
-
-  const removeProject = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      projects: prev.projects.filter(project => project.id !== id)
-    }))
-  }
-
-  const toggleCoreProject = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      projects: prev.projects.map(project => 
-        project.id === id ? { ...project, isCore: !project.isCore } : project
-      )
-    }))
-  }
-
-  // 配置拖拽传感器
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  )
-
-  // 处理拖拽结束
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-
-    if (!over || active.id === over.id) {
-      return
-    }
-
-    setFormData(prev => {
-      const oldIndex = prev.projects.findIndex(p => p.id === active.id)
-      const newIndex = prev.projects.findIndex(p => p.id === over.id)
-
-      const newProjects = arrayMove(prev.projects, oldIndex, newIndex)
-      
-      return {
-        ...prev,
-        projects: newProjects.map((project, index) => ({
-          ...project,
-          order: index
-        }))
-      }
-    })
-  }
-
   const showAlert = (type: 'success' | 'error', message: string) => {
     setAlertState({ show: true, type, message })
     setTimeout(() => {
@@ -191,9 +120,7 @@ export function WorkFormDetail({
 
   return (
     <motion.div 
-      className="max-w-3xl mx-auto space-y-8"
-      initial="hidden"
-      animate="show"
+      className="space-y-6"
       variants={container}
     >
       <motion.div variants={item}>
@@ -281,7 +208,7 @@ export function WorkFormDetail({
       {/* 自定义信息 */}
       <motion.div variants={item}>
         <CustomFieldsSection 
-          fields={formData.customFields}
+          fields={formData.customFields ?? []}
           onFieldsChange={(fields) => setFormData(prev => ({ ...prev, customFields: fields }))}
           disabled={!isEditing}
           isEditing={isEditing}
@@ -294,83 +221,24 @@ export function WorkFormDetail({
             }
             setFormData(prev => ({
               ...prev,
-              customFields: [...prev.customFields, newField]
+              customFields: [...(prev.customFields ?? []), newField]
             }))
           }}
           onRemove={(id) => {
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.filter(field => field.id !== id)
+              customFields: prev.customFields?.filter(field => field.id !== id) ?? []
             }))
           }}
           onUpdate={(id, field, value) => {
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.map(item => 
+              customFields: prev.customFields?.map(item => 
                 item.id === id ? { ...item, [field]: value } : item
-              )
+              ) ?? []
             }))
           }}
         />
-      </motion.div>
-
-      {/* 项目经历 */}
-      <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold">项目经历</h2>
-            </div>
-            {isEditing && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addProject}
-                className={cn(
-                  "gap-2",
-                  "text-muted-foreground hover:text-foreground",
-                  "border-dashed border-muted-foreground/50"
-                )}
-              >
-                <Plus className="h-4 w-4" />
-                添加项目
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent>
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={formData.projects.map(p => p.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="space-y-4">
-                  {formData.projects
-                    .sort((a, b) => (a.order - b.order))
-                    .map((project) => (
-                      <ProjectItem
-                        key={project.id}
-                        project={project}
-                        isEditing={isEditing}
-                        onUpdate={(id, field, value) => updateProject(id, field as keyof Project, value)}
-                        onRemove={removeProject}
-                        onToggleCore={toggleCoreProject}
-                      />
-                    ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-            {formData.projects.length === 0 && isEditing && (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>点击上方按钮添加项目</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </motion.div>
 
       {/* 工作总结 */}
@@ -386,7 +254,6 @@ export function WorkFormDetail({
               onChange={(html) => handleInputChange('summary', html)}
               isEditing={isEditing}
               onAIGenerate={async () => {
-                // TODO: 实现 AI 生成功能
                 console.log('AI 生成工作总结')
               }}
             />
@@ -396,38 +263,18 @@ export function WorkFormDetail({
 
       {/* 公司照片 */}
       <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 pb-2">
-            <Camera className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">公司照片</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              上传一张与该公司相关的照片，可以是公司logo或办公环境等。该照片将展示在工作经历封面和Web简历中。
-            </p>
-            <div className="flex justify-center">
-              <ImageUpload
-                value={preview}
-                onChange={(url) => {
-                  setPreview(url)
-                  handleInputChange('photo', url)
-                }}
-                disabled={!isEditing}
-                tip="点击上传公司照片"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <PhotoUploader
+          title="公司照片"
+          description="上传与该公司相关的照片，可以是公司logo或办公环境等。第一张照片将作为封面展示。"
+          photos={formData.photos ?? []}
+          onChange={(photos) => handleInputChange('photos', photos)}
+          isEditing={isEditing}
+          maxPhotos={5}
+        />
       </motion.div>
 
       {/* 保存/编辑按钮 */}
-      <motion.div 
-        variants={item}
-        className="fixed bottom-8 right-8 z-10"
-        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
+      <motion.div variants={item} className="fixed bottom-8 right-8 z-10">
         <Button
           onClick={isEditing ? handleSave : handleEdit}
           disabled={isSaving}

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { LoginCard } from '@/components/auth/LoginCard'
 import { Alert } from '@/components/ui/alert'
+import  Image from 'next/image'
 
 export default function Login() {
   const [error, setError] = useState('')
@@ -42,7 +43,7 @@ export default function Login() {
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
         <div className="absolute inset-0 bg-zinc-900" />
         <div className="relative z-20 flex items-center text-lg font-medium">
-          <img src="/logo.svg" alt="Logo" className="h-8 w-8 mr-2" />
+          <Image src="/logo.svg" alt="Logo" className="h-8 w-8 mr-2" />
           ShowYourself
         </div>
         <div className="relative z-20 mt-auto">

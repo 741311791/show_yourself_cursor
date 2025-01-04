@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from "react"
 import { Plus, GraduationCap, MapPin, Calendar, ChevronRight, Pencil, Trash2, Loader2 } from "lucide-react"
 import { motion } from "motion/react"
-import { Education } from "@/types/education"
+import { Education, defaultEducation } from "@/types/education"
 import { EducationFormDetail } from "../education/EducationFormDetail"
 import Image from "next/image"
 import {
@@ -25,23 +25,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { Alert } from "@/components/shared/Alert"
 
-const mockEducations: Education[] = [
-  {
-    id: "1",
-    school: "示例大学",
-    location: "北京",
-    startDate: "2019-09",
-    endDate: "2023-06",
-    major: "计算机科学",
-    courses: "数据结构、算法",
-    gpa: "3.8",
-    degree: "学士",
-    photo: "",
-    customFields: [],
-    summary: ""
-  }
-]
 
 const container = {
   hidden: { opacity: 0 },
@@ -101,14 +86,14 @@ function EducationList({
       {/* 教育经历列表 */}
       <div className="flex flex-col">
         {educations.map((education, index) => (
-          <React.Fragment key={education.id}>
+          <React.Fragment key={education.id ?? index}>
             {index > 0 && <div className="h-4" />}
             
             <ContextMenu>
               <ContextMenuTrigger>
                 <motion.div
                   variants={item}
-                  onClick={() => onEdit(education.id)}
+                  onClick={() => onEdit(education.id ?? "")}
                   className="relative flex items-start gap-6 group cursor-pointer"
                 >
                   {/* 时间线节点 */}
@@ -175,10 +160,10 @@ function EducationList({
                         </div>
 
                         {/* 图片部分 */}
-                        {education.photo ? (
+                        {education.photos && education.photos.length > 0 ? (
                           <div className="relative flex-1 border-l border-border">
                             <Image
-                              src={education.photo}
+                              src={education.photos[0]}
                               alt={education.school}
                               fill
                               className="object-cover"
@@ -195,12 +180,12 @@ function EducationList({
                 </motion.div>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem onClick={() => onEdit(education.id)}>
+                <ContextMenuItem onClick={() => onEdit(education.id ?? "")}>
                   <Pencil className="mr-2 h-4 w-4" />
                   <span>编辑</span>
                 </ContextMenuItem>
                 <ContextMenuItem
-                  onClick={() => onDelete(education.id)}
+                  onClick={() => onDelete(education.id ?? "")}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -244,6 +229,23 @@ export function EducationTimeline() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [alertState, setAlertState] = useState<{
+    show: boolean
+    type: 'success' | 'error' | 'info'
+    message: string
+  }>({
+    show: false,
+    type: 'success',
+    message: ''
+  })
+
+  // 显示提示信息
+  const showAlert = (type: 'success' | 'error' | 'info', message: string) => {
+    setAlertState({ show: true, type, message })
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
 
   // 获取教育经历列表
   useEffect(() => {
@@ -252,21 +254,23 @@ export function EducationTimeline() {
         setIsLoading(true)
         setError(null)
         
-        // TODO: 替换为实际的 API 调用
-        // const response = await fetch('/api/educations')
-        // const data = await response.json()
+        const response = await fetch('/api/education')
+        if (!response.ok) {
+          throw new Error('获取教育经历失败')
+        }
         
-        // 模拟 API 调用
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        const data: Education[] = []
+        const data = await response.json()
+        setEducations(data)
 
-        // 如果返回的数据为空，使用 mock 数据
-        setEducations(data.length > 0 ? data : mockEducations)
+        if (data.length === 0) {
+          showAlert('info', '暂无教育经历，快来添加吧~')
+        } else {
+          showAlert('success', '成功获取教育经历')
+        }
       } catch (error) {
         console.error('获取教育经历失败:', error)
         setError('获取教育经历失败，请刷新页面重试')
-        // 发生错误时也使用 mock 数据
-        setEducations(mockEducations)
+        showAlert('error', '获取教育经历失败，请刷新页面重试')
       } finally {
         setIsLoading(false)
       }
@@ -284,127 +288,121 @@ export function EducationTimeline() {
     })
   }, [educations])
 
-  const handleAddEducation = () => {
-    const newEducation: Education = {
-      id: Math.random().toString(),
-      school: "",
-      location: "",
-      startDate: "",
-      endDate: "",
-      major: "",
-      courses: "",
-      gpa: "",
-      degree: "",
-      photo: "",
-      customFields: [],
-      summary: ""
+  const handleAddEducation = async () => {
+    try {
+      const response = await fetch('/api/education', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(defaultEducation),
+      })
+
+      if (!response.ok) {
+        throw new Error('创建教育经历失败')
+      }
+
+      const newEducation = await response.json()
+      setEducations(prev => [...prev, newEducation])
+      setSelectedId(newEducation.id)
+      showAlert('success', '已创建新的教育经历')
+    } catch (error) {
+      console.error('创建教育经历失败:', error)
+      showAlert('error', '创建教育经历失败，请重试')
     }
-    setEducations(prev => [...prev, newEducation])
-    setSelectedId(newEducation.id)
   }
 
   const handleSaveEducation = (updatedEducation: Education) => {
     setEducations(prev => 
-      prev.map(edu => edu.id === selectedId ? updatedEducation : edu)
+      prev.map(education => education.id === updatedEducation.id ? updatedEducation : education)
     )
-  }
-
-  const handleReturn = () => {
     setSelectedId(null)
+    console.log("updatedEducation", updatedEducation)
+    showAlert('success', '保存成功')
   }
 
   const handleDelete = async (id: string) => {
     try {
       setIsDeleting(true)
-      // TODO: 调用删除教育经历 API
-      await new Promise(resolve => setTimeout(resolve, 1000)) // 模拟 API 调用
       
-      // TODO: 重新获取教育经历列表
+      const response = await fetch(`/api/education/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('删除教育经历失败')
+      }
+
       setEducations(prev => prev.filter(edu => edu.id !== id))
       setDeleteId(null)
+      showAlert('success', '删除成功')
     } catch (error) {
       console.error('删除失败:', error)
+      showAlert('error', '删除失败，请重试')
     } finally {
       setIsDeleting(false)
     }
   }
 
-  // 如果正在加载，显示加载状态
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[200px]">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">加载教育经历...</p>
-        </div>
-      </div>
-    )
-  }
+  return (
+    <>
+      {/* Alert 组件 */}
+      <Alert
+        show={alertState.show}
+        type={alertState.type}
+        message={alertState.message}
+      />
 
-  // 如果有错误但使用了 mock 数据，显示错误提示
-  if (error) {
-    return (
-      <div className="space-y-6">
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">加载教育经历...</p>
+          </div>
+        </div>
+      ) : error ? (
         <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
           {error}
         </div>
-        <EducationList 
-          educations={sortedEducations}
-          onEdit={setSelectedId}
-          onDelete={setDeleteId}
-          isDeleting={isDeleting}
-          deleteId={deleteId}
-          onDeleteConfirm={handleDelete}
-          onDeleteCancel={() => setDeleteId(null)}
+      ) : selectedId ? (
+        <EducationFormDetail
+          education={educations.find(edu => edu.id === selectedId)!}
+          onSave={handleSaveEducation}
+          onCancel={() => setSelectedId(null)}
         />
-      </div>
-    )
-  }
-
-  if (selectedId) {
-    const education = educations.find(edu => edu.id === selectedId)
-    if (!education) return null
-
-    return (
-      <EducationFormDetail
-        education={education}
-        onSave={handleSaveEducation}
-        onCancel={handleReturn}
-      />
-    )
-  }
-
-  return (
-    <>
-      <EducationList 
-        educations={sortedEducations}
-        onEdit={setSelectedId}
-        onDelete={setDeleteId}
-        isDeleting={isDeleting}
-        deleteId={deleteId}
-        onDeleteConfirm={handleDelete}
-        onDeleteCancel={() => setDeleteId(null)}
-      />
-      
-      {/* 添加按钮 */}
-      <motion.div 
-        className="mt-16 text-center"
-        variants={item}
-      >
-        <Button
-          onClick={handleAddEducation}
-          className={cn(
-            "gap-2 bg-gradient-to-r from-primary to-primary/80",
-            "hover:shadow-lg hover:shadow-primary/20",
-            "dark:from-primary/90 dark:to-primary/70",
-            "dark:hover:shadow-primary/40",
-            "transform hover:-translate-y-0.5 transition-all"
-          )}
-        >
-          <Plus className="h-4 w-4" />
-          添加教育经历
-        </Button>
-      </motion.div>
+      ) : (
+        <>
+          <EducationList 
+            educations={sortedEducations}
+            onEdit={setSelectedId}
+            onDelete={setDeleteId}
+            isDeleting={isDeleting}
+            deleteId={deleteId}
+            onDeleteConfirm={handleDelete}
+            onDeleteCancel={() => setDeleteId(null)}
+          />
+          
+          {/* 添加按钮 */}
+          <motion.div 
+            className="mt-16 text-center"
+            variants={item}
+          >
+            <Button
+              onClick={handleAddEducation}
+              className={cn(
+                "gap-2 bg-gradient-to-r from-primary to-primary/80",
+                "hover:shadow-lg hover:shadow-primary/20",
+                "dark:from-primary/90 dark:to-primary/70",
+                "dark:hover:shadow-primary/40",
+                "transform hover:-translate-y-0.5 transition-all"
+              )}
+            >
+              <Plus className="h-4 w-4" />
+              添加教育经历
+            </Button>
+          </motion.div>
+        </>
+      )}
     </>
   )
-} 
+}
