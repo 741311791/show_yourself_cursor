@@ -13,6 +13,7 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
 
+import logo from '@/public/logo.svg'
 
 const navItems = [
   {
@@ -47,7 +48,7 @@ export function Navbar() {
       <div className="container flex h-14 items-center">
         {/* Logo */}
         <Link href="/" className="mr-8 flex items-center space-x-2">
-          <img src="/logo.svg" alt="Logo" className="h-6 w-6" />
+          <img src={logo.src} alt="Logo" className="h-16 w-16" />
           <span className="font-bold">ShowYourself</span>
         </Link>
 

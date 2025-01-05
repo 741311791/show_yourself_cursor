@@ -230,6 +230,7 @@ model Research {
 
 model ResearchResult {
   id          String   @id @default(cuid())
+  userId      String
   researchId  String
   type        ResearchResultType
   name        String

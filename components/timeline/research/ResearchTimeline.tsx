@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from "react"
 import { Plus, BookMarked, MapPin, Calendar, ChevronRight, Pencil, Trash2, Loader2, User } from "lucide-react"
 import { motion } from "motion/react"
-import { Research } from "@/types/research"
+import { Research, defaultResearch } from "@/types/research"
 import { ResearchFormDetail } from "@/components/timeline/research/ResearchFormDetail"
 import {
   ContextMenu,
@@ -25,21 +25,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-
-const mockResearches: Research[] = [
-  {
-    id: "1",
-    direction: "示例研究方向",
-    institution: "示例研究机构",
-    startDate: "2020-01",
-    endDate: "2023-12",
-    role: "主要研究员",
-    photo: null,
-    customFields: [],
-    results: [],
-    summary: ""
-  }
-]
+import { Alert } from "@/components/shared/Alert"
 
 interface ResearchListProps {
   researches: Research[]
@@ -107,7 +93,7 @@ function ResearchList({
               <ContextMenuTrigger>
                 <motion.div
                   variants={item}
-                  onClick={() => onEdit(research.id)}
+                  onClick={() => onEdit(research.id ?? '')}
                   className="relative flex items-start gap-6 group cursor-pointer"
                 >
                   {/* 时间线节点 */}
@@ -168,11 +154,11 @@ function ResearchList({
                         </div>
 
                         {/* 图片部分 */}
-                        {research.photo ? (
+                        {research.photos && research.photos.length > 0 ? (
                           <div className="relative flex-1 border-l border-border">
                             <Image
-                              src={research.photo}
-                              alt={research.direction}
+                              src={research.photos[0]}
+                              alt={research.direction ?? ''}
                               fill
                               className="object-cover"
                             />
@@ -188,12 +174,12 @@ function ResearchList({
                 </motion.div>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem onClick={() => onEdit(research.id)}>
+                <ContextMenuItem onClick={() => onEdit(research.id ?? '')}>
                   <Pencil className="mr-2 h-4 w-4" />
                   <span>编辑</span>
                 </ContextMenuItem>
                 <ContextMenuItem
-                  onClick={() => onDelete(research.id)}
+                  onClick={() => onDelete(research.id ?? '')}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -237,21 +223,47 @@ export function ResearchTimeline() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [alertState, setAlertState] = useState<{
+    show: boolean
+    type: 'success' | 'error' | 'info'
+    message: string
+  }>({
+    show: false,
+    type: 'success',
+    message: ''
+  })
 
-  // 获取科研经历列表
+  const showAlert = (type: 'success' | 'error' | 'info', message: string) => {
+    setAlertState({ show: true, type, message })
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
+
+  // 获取研究经历列表
   useEffect(() => {
     const fetchResearches = async () => {
       try {
         setIsLoading(true)
         setError(null)
         
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        const data: Research[] = []
-        setResearches(data.length > 0 ? data : mockResearches)
+        const response = await fetch('/api/research')
+        if (!response.ok) {
+          throw new Error('获取研究经历失败')
+        }
+        
+        const data = await response.json()
+        setResearches(data)
+
+        if (data.length === 0) {
+          showAlert('info', '暂无研究经历，快来添加吧~')
+        } else {
+          showAlert('success', '成功获取研究经历')
+        }
       } catch (error) {
-        console.error('获取科研经历失败:', error)
-        setError('获取科研经历失败，请刷新页面重试')
-        setResearches(mockResearches)
+        console.error('获取研究经历失败:', error)
+        setError('获取研究经历失败，请刷新页面重试')
+        showAlert('error', '获取研究经历失败，请刷新页面重试')
       } finally {
         setIsLoading(false)
       }
@@ -269,116 +281,131 @@ export function ResearchTimeline() {
     })
   }, [researches])
 
-  const handleAddResearch = () => {
-    const newResearch: Research = {
-      id: Math.random().toString(),
-      direction: "",
-      institution: "",
-      startDate: "",
-      endDate: "",
-      role: "",
-      photo: null,
-      customFields: [],
-      results: [],
-      summary: ""
+  const handleAddResearch = async () => {
+    try {
+      const response = await fetch('/api/research', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(defaultResearch)
+      })
+
+      if (!response.ok) {
+        throw new Error('创建研究经历失败')
+      }
+
+      const newResearch = await response.json()
+      setResearches(prev => [...prev, newResearch])
+      setSelectedId(newResearch.id)
+      showAlert('success', '已创建新的研究经历')
+    } catch (error) {
+      console.error('创建研究经历失败:', error)
+      showAlert('error', '创建研究经历失败，请重试')
     }
-    setResearches(prev => [...prev, newResearch])
-    setSelectedId(newResearch.id)
   }
 
   const handleSaveResearch = (updatedResearch: Research) => {
     setResearches(prev => 
-      prev.map(research => research.id === selectedId ? updatedResearch : research)
+      prev.map(research => research.id === updatedResearch.id ? updatedResearch : research)
     )
+    setSelectedId(null)
+    showAlert('success', '保存成功')
   }
 
   const handleDelete = async (id: string) => {
     try {
       setIsDeleting(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const response = await fetch(`/api/research/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('删除研究经历失败')
+      }
+
       setResearches(prev => prev.filter(research => research.id !== id))
       setDeleteId(null)
+      showAlert('success', '删除成功')
     } catch (error) {
       console.error('删除失败:', error)
+      showAlert('error', '删除失败，请重试')
     } finally {
       setIsDeleting(false)
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[200px]">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">加载科研经历...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
-          {error}
-        </div>
-        <ResearchList 
-          researches={sortedResearches}
-          onEdit={setSelectedId}
-          onDelete={setDeleteId}
-          isDeleting={isDeleting}
-          deleteId={deleteId}
-          onDeleteConfirm={handleDelete}
-          onDeleteCancel={() => setDeleteId(null)}
-        />
-      </div>
-    )
-  }
-
-  if (selectedId) {
-    const research = researches.find(r => r.id === selectedId)
-    if (!research) return null
-
-    return (
-      <ResearchFormDetail
-        research={research}
-        onSave={handleSaveResearch}
-        onCancel={() => setSelectedId(null)}
-      />
-    )
-  }
-
   return (
     <>
-      <ResearchList 
-        researches={sortedResearches}
-        onEdit={setSelectedId}
-        onDelete={setDeleteId}
-        isDeleting={isDeleting}
-        deleteId={deleteId}
-        onDeleteConfirm={handleDelete}
-        onDeleteCancel={() => setDeleteId(null)}
+      {/* Alert 组件 */}
+      <Alert
+        show={alertState.show}
+        type={alertState.type}
+        message={alertState.message}
       />
-      
-      {/* 添加按钮 */}
-      <motion.div 
-        className="mt-16 text-center"
-        variants={item}
-      >
-        <Button
-          onClick={handleAddResearch}
-          className={cn(
-            "gap-2 bg-gradient-to-r from-primary to-primary/80",
-            "hover:shadow-lg hover:shadow-primary/20",
-            "dark:from-primary/90 dark:to-primary/70",
-            "dark:hover:shadow-primary/40",
-            "transform hover:-translate-y-0.5 transition-all"
-          )}
-        >
-          <Plus className="h-4 w-4" />
-          添加科研经历
-        </Button>
-      </motion.div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">加载研究经历...</p>
+          </div>
+        </div>
+      ) : error ? (
+        <div className="space-y-6">
+          <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
+            {error}
+          </div>
+          <ResearchList 
+            researches={sortedResearches}
+            onEdit={setSelectedId}
+            onDelete={setDeleteId}
+            isDeleting={isDeleting}
+            deleteId={deleteId}
+            onDeleteConfirm={handleDelete}
+            onDeleteCancel={() => setDeleteId(null)}
+          />
+        </div>
+      ) : selectedId ? (
+        <ResearchFormDetail
+          research={researches.find(r => r.id === selectedId)!}
+          onSave={handleSaveResearch}
+          onCancel={() => setSelectedId(null)}
+        />
+      ) : (
+        <>
+          <ResearchList 
+            researches={sortedResearches}
+            onEdit={setSelectedId}
+            onDelete={setDeleteId}
+            isDeleting={isDeleting}
+            deleteId={deleteId}
+            onDeleteConfirm={handleDelete}
+            onDeleteCancel={() => setDeleteId(null)}
+          />
+          
+          {/* 添加按钮 */}
+          <motion.div 
+            className="mt-16 text-center"
+            variants={item}
+          >
+            <Button
+              onClick={handleAddResearch}
+              className={cn(
+                "gap-2 bg-gradient-to-r from-primary to-primary/80",
+                "hover:shadow-lg hover:shadow-primary/20",
+                "dark:from-primary/90 dark:to-primary/70",
+                "dark:hover:shadow-primary/40",
+                "transform hover:-translate-y-0.5 transition-all"
+              )}
+            >
+              <Plus className="h-4 w-4" />
+              添加研究经历
+            </Button>
+          </motion.div>
+        </>
+      )}
     </>
   )
 }
