@@ -3,15 +3,15 @@
 import React, { useState } from "react"
 import { motion } from "motion/react"
 import { 
-  BookMarked, MapPin, Calendar, User,
-  FileText, Save, Edit2, Camera
+  BookOpen, Calendar, FileText, Save, Edit2
 } from "lucide-react"
-import { Research } from "@/types/research"
+import { ResearchResult } from "@/types/research"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { Alert } from "@/components/shared/Alert"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
@@ -33,18 +33,26 @@ const item = {
   show: { opacity: 1, y: 0 }
 }
 
-interface ResearchFormDetailProps {
-  research: Research
-  onSave: (research: Research) => void
+interface ResearchResultFormDetailProps {
+  result: ResearchResult
+  onSave: (result: ResearchResult) => void
   onCancel: () => void
 }
 
-export function ResearchFormDetail({
-  research,
+const resultTypes = [
+  { value: 'PAPER', label: '论文' },
+  { value: 'PATENT', label: '专利' },
+  { value: 'SOFTWARE', label: '软件著作权' },
+  { value: 'AWARD', label: '获奖' },
+  { value: 'OTHER', label: '其他' }
+]
+
+export function ResearchResultFormDetail({
+  result,
   onSave,
   onCancel
-}: ResearchFormDetailProps) {
-  const [formData, setFormData] = useState<Research>(research)
+}: ResearchResultFormDetailProps) {
+  const [formData, setFormData] = useState<ResearchResult>(result)
   const [isEditing, setIsEditing] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
@@ -58,7 +66,7 @@ export function ResearchFormDetail({
   })
 
   const handleInputChange = (
-    field: keyof Research, 
+    field: keyof ResearchResult, 
     value: string | string[]
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -104,7 +112,7 @@ export function ResearchFormDetail({
     try {
       setIsSaving(true)
 
-      const response = await fetch(`/api/research/${research.id}`, {
+      const response = await fetch(`/api/research-result/${result.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -116,8 +124,8 @@ export function ResearchFormDetail({
         throw new Error('保存失败')
       }
 
-      const updatedResearch = await response.json()
-      onSave(updatedResearch)
+      const updatedResult = await response.json()
+      onSave(updatedResult)
       setIsEditing(false)
       showAlert('success', '保存成功')
     } catch (error) {
@@ -133,87 +141,65 @@ export function ResearchFormDetail({
   }
 
   return (
-    <motion.div 
-      className="max-w-3xl mx-auto space-y-8"
+    <motion.div
+      variants={container}
       initial="hidden"
       animate="show"
-      variants={container}
+      className="space-y-6"
     >
-      {/* 返回按钮 */}
-      <motion.div variants={item}>
-        <Button
-          variant="ghost"
-          onClick={onCancel}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          ← 返回列表
-        </Button>
-      </motion.div>
-
       {/* 基本信息 */}
       <motion.div variants={item}>
         <Card>
           <CardHeader className="flex-row items-center gap-2 pb-2">
-            <BookMarked className="h-5 w-5 text-primary" />
+            <BookOpen className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">基本信息</h2>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <Label>研究方向</Label>
-                </div>
+                <Label>成果名称</Label>
                 <Input
-                  value={formData.direction}
-                  onChange={(e) => handleInputChange('direction', e.target.value)}
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  disabled={!isEditing}
+                  placeholder="请输入成果名称"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>成果类型</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) => handleInputChange('type', value)}
+                  disabled={!isEditing}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="选择成果类型" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {resultTypes.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>发表/获得日期</Label>
+                <Input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleInputChange('date', e.target.value)}
                   disabled={!isEditing}
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <Label>研究机构</Label>
-                </div>
-                <Input
-                  value={formData.institution}
-                  onChange={(e) => handleInputChange('institution', e.target.value)}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <Label>担任角色</Label>
-                </div>
+                <Label>本人角色</Label>
                 <Input
                   value={formData.role}
                   onChange={(e) => handleInputChange('role', e.target.value)}
                   disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <Label>开始时间</Label>
-                </div>
-                <Input
-                  value={formData.startDate}
-                  onChange={(e) => handleInputChange('startDate', e.target.value)}
-                  disabled={!isEditing}
-                  type="month"
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <Label>结束时间</Label>
-                </div>
-                <Input
-                  value={formData.endDate}
-                  onChange={(e) => handleInputChange('endDate', e.target.value)}
-                  disabled={!isEditing}
-                  type="month"
+                  placeholder="如：第一作者、发明人等"
                 />
               </div>
             </div>
@@ -232,12 +218,12 @@ export function ResearchFormDetail({
         />
       </motion.div>
 
-      {/* 科研总结 */}
+      {/* 成果描述 */}
       <motion.div variants={item}>
         <Card>
           <CardHeader className="flex-row items-center gap-2 pb-2">
             <FileText className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">科研总结</h2>
+            <h2 className="text-xl font-semibold">成果描述</h2>
           </CardHeader>
           <CardContent>
             <AIRichTextEditor
@@ -245,7 +231,7 @@ export function ResearchFormDetail({
               onChange={(html) => handleInputChange('summary', html)}
               isEditing={isEditing}
               onAIGenerate={async () => {
-                console.log('AI 生成科研总结')
+                console.log('AI 生成成果描述')
               }}
             />
           </CardContent>
@@ -260,7 +246,7 @@ export function ResearchFormDetail({
           isEditing={isEditing}
           maxPhotos={5}
           title="相关图片"
-          description="上传科研相关图片（最多5张）"
+          description="上传成果相关图片（最多5张）"
         />
       </motion.div>
 

@@ -20,21 +20,21 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Alert } from "@/components/shared/Alert"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
+import { PhotoUploader } from "@/components/timeline/shared/PhotoUploader"
 
 const publicationTypes = [
-  { value: 'journal', label: '期刊论文' },
-  { value: 'conference', label: '会议论文' },
-  { value: 'book', label: '专著' },
-  { value: 'patent', label: '专利' },
-  { value: 'other', label: '其���' }
+  { value: 'PAPER', label: '期刊论文' },
+  { value: 'CONFERENCE', label: '会议论文' },
+  { value: 'BOOK', label: '专著' },
+  { value: 'PATENT', label: '专利' },
+  { value: 'OTHER', label: '其他' }
 ]
 
 interface PublicationFormDetailProps {
   publication: Publication
-  onSave: (publication: Publication) => void
+  onSave: (publication: Publication) => Promise<void>
   onCancel: () => void
 }
 
@@ -61,7 +61,6 @@ export function PublicationFormDetail({
 }: PublicationFormDetailProps) {
   const [formData, setFormData] = useState<Publication>(publication)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(publication.photo)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean
@@ -73,9 +72,16 @@ export function PublicationFormDetail({
     message: ''
   })
 
+  const showAlert = (type: 'success' | 'error', message: string) => {
+    setAlertState({ show: true, type, message })
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
+
   const handleInputChange = (
     field: keyof Publication, 
-    value: string
+    value: string | string[]
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
@@ -89,53 +95,60 @@ export function PublicationFormDetail({
     }
     setFormData(prev => ({
       ...prev,
-      customFields: [...prev.customFields, newField]
+      customFields: [...(prev.customFields || []), newField]
     }))
   }
 
   const removeCustomField = (id: string) => {
     setFormData(prev => ({
       ...prev,
-      customFields: prev.customFields.filter(field => field.id !== id)
+      customFields: (prev.customFields || []).filter(field => field.id !== id)
     }))
   }
 
   const updateCustomField = (id: string, field: 'title' | 'content' | 'icon', value: string) => {
     setFormData(prev => ({
       ...prev,
-      customFields: prev.customFields.map(item => 
+      customFields: (prev.customFields || []).map(item => 
         item.id === id ? { ...item, [field]: value } : item
       )
     }))
   }
 
-  const showAlert = (type: 'success' | 'error', message: string) => {
-    setAlertState({ show: true, type, message })
-    setTimeout(() => {
-      setAlertState(prev => ({ ...prev, show: false }))
-    }, 3000)
-  }
-
   const handleSave = async () => {
     try {
+
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      showAlert('success', '保存成功')
+      console.log('publication', publication)
+      const response = await fetch(`/api/publication/${publication.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData),
+        cache: 'no-store'
+      })
+
+      if (!response.ok) {
+        throw new Error('保存失败')
+      }
+
       
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      onSave(formData)
+
+      const updatedPublication = await response.json()
+      onSave(updatedPublication)
+      showAlert('success', '保存成功')
       setIsEditing(false)
     } catch (error) {
       console.error('保存失败:', error)
       showAlert('error', '保存失败，请重试')
+    } finally {
       setIsSaving(false)
-      return
     }
-    setIsSaving(false)
   }
 
   const handleEdit = () => {
-    setIsEditing(true)
+    setIsEditing(true)  // 切换到可编辑状态
   }
 
   return (
@@ -214,7 +227,7 @@ export function PublicationFormDetail({
               <div className="col-span-2 space-y-2">
                 <Label className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4 text-muted-foreground" />
-                  ��物名称
+                  刊物名称
                 </Label>
                 <Input
                   value={formData.journal}
@@ -243,7 +256,7 @@ export function PublicationFormDetail({
       {/* 自定义信息 */}
       <motion.div variants={item}>
         <CustomFieldsSection
-          fields={formData.customFields}
+          fields={formData.customFields || []}
           isEditing={isEditing}
           onAdd={addCustomField}
           onRemove={removeCustomField}
@@ -260,11 +273,11 @@ export function PublicationFormDetail({
           </CardHeader>
           <CardContent>
             <AIRichTextEditor
-              content={formData.summary}
+              content={formData.summary || ''}
               onChange={(html) => handleInputChange('summary', html)}
               isEditing={isEditing}
               onAIGenerate={async () => {
-                console.log('AI 生成作品总结')
+                // AI 生成功能待实现
               }}
             />
           </CardContent>
@@ -273,28 +286,14 @@ export function PublicationFormDetail({
 
       {/* 刊物图片 */}
       <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 pb-2">
-            <Camera className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">刊物图片</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              上传一张与该出版物相关的图片，可以是刊物封面、专利证书等。该图片将展示在出版物列表和Web简历中。
-            </p>
-            <div className="flex justify-center">
-              <ImageUpload
-                value={preview}
-                onChange={(url) => {
-                  setPreview(url)
-                  handleInputChange('photo', url)
-                }}
-                disabled={!isEditing}
-                tip="点击上传图片"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <PhotoUploader
+          photos={formData.photos || []}
+          onChange={(photos) => handleInputChange('photos', photos)}
+          isEditing={isEditing}
+          maxPhotos={5}
+          title="相关照片"
+          description="上传一张与该出版物相关的图片，可以是刊物封面、专利证书等。该图片将展示在出版物列表和Web简历中。"
+        />
       </motion.div>
 
       {/* 保存/编辑按钮 */}
@@ -341,4 +340,4 @@ export function PublicationFormDetail({
       />
     </motion.div>
   )
-} 
+}

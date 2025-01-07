@@ -1,6 +1,6 @@
 import { CustomField } from "./shared"  // 导入共享类型
 
-export type ResearchResultType = 'paper' | 'patent' | 'conference' | 'other'
+export type ResearchResultType = 'PAPER' | 'PATENT' | 'CONFERENCE' | 'OTHER'
 
 export interface ResearchResult {
   id?: string
@@ -10,6 +10,7 @@ export interface ResearchResult {
   role?: string
   date?: string
   customFields?: CustomField[]
+  photos?: string[]
   summary?: string
 }
 
@@ -37,10 +38,11 @@ export const defaultResearch: Research = {
 }
 
 export const defaultResearchResult: ResearchResult = {
-  type: 'paper',
+  type: 'PAPER',
   name: '',
   role: '',
   date: '',
   customFields: [],
+  photos: [],
   summary: ''
 }

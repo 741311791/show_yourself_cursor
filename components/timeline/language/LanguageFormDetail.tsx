@@ -5,7 +5,7 @@ import { motion } from "motion/react"
 import { 
   Edit2, Save,
   Languages, Calendar, 
-  FileText, Camera, Globe,
+  FileText, Globe,
   GraduationCap, Clock, Medal,
   Star
 } from "lucide-react"
@@ -16,9 +16,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Alert } from "@/components/shared/Alert"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
+import { PhotoUploader } from "@/components/timeline/shared/PhotoUploader"
 
 const container = {
   hidden: { opacity: 0 },
@@ -36,19 +36,18 @@ const item = {
 }
 
 interface LanguageFormDetailProps {
-  language: Language
-  onSave: (language: Language) => void
+  data: Language
+  onSave: (language: Language) => Promise<void>
   onCancel: () => void
 }
 
 export function LanguageFormDetail({ 
-  language,
+  data,
   onSave,
   onCancel 
 }: LanguageFormDetailProps) {
-  const [formData, setFormData] = useState<Language>(language)
+  const [formData, setFormData] = useState<Language>(data)
   const [isEditing, setIsEditing] = useState(true)
-  const [preview, setPreview] = useState<string | null>(language.photo)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
     show: boolean
@@ -60,18 +59,37 @@ export function LanguageFormDetail({
     message: ''
   })
 
-  const handleInputChange = (field: keyof Language, value: string) => {
+  const showAlert = (type: 'success' | 'error', message: string) => {
+    setAlertState({ show: true, type, message })
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
+
+  const handleInputChange = (field: keyof Language, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      onSave(formData)
-      setIsEditing(false)
+
+      const response = await fetch(`/api/language/${data.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) {
+        throw new Error('保存失败')
+      }
+
+      const updatedLanguage = await response.json()
+      await onSave(updatedLanguage)
       showAlert('success', '保存成功')
+      setIsEditing(false)
     } catch (error) {
       console.error('保存失败:', error)
       showAlert('error', '保存失败，请重试')
@@ -84,13 +102,6 @@ export function LanguageFormDetail({
     setIsEditing(true)
   }
 
-  const showAlert = (type: 'success' | 'error', message: string) => {
-    setAlertState({ show: true, type, message })
-    setTimeout(() => {
-      setAlertState(prev => ({ ...prev, show: false }))
-    }, 3000)
-  }
-
   return (
     <motion.div 
       className="max-w-3xl mx-auto space-y-8"
@@ -98,6 +109,7 @@ export function LanguageFormDetail({
       animate="show"
       variants={container}
     >
+      {/* 返回按钮 */}
       <motion.div variants={item}>
         <Button
           variant="ghost"
@@ -195,7 +207,7 @@ export function LanguageFormDetail({
       {/* 自定义字段 */}
       <motion.div variants={item}>
         <CustomFieldsSection 
-          fields={formData.customFields}
+          fields={formData.customFields || []}
           onFieldsChange={(fields) => setFormData(prev => ({ ...prev, customFields: fields }))}
           disabled={!isEditing}
           isEditing={isEditing}
@@ -208,19 +220,19 @@ export function LanguageFormDetail({
             }
             setFormData(prev => ({
               ...prev,
-              customFields: [...prev.customFields, newField]
+              customFields: [...(prev.customFields || []), newField]
             }))
           }}
           onRemove={(id) => {
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.filter(field => field.id !== id)
+              customFields: (prev.customFields || []).filter(field => field.id !== id)
             }))
           }}
           onUpdate={(id, field, value) => {
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.map(item => 
+              customFields: (prev.customFields || []).map(item => 
                 item.id === id ? { ...item, [field]: value } : item
               )
             }))
@@ -235,14 +247,13 @@ export function LanguageFormDetail({
             <FileText className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">语言学习总结</h2>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <AIRichTextEditor 
-              content={formData.summary}
+              content={formData.summary || ''}
               onChange={(html) => handleInputChange('summary', html)}
               isEditing={isEditing}
               onAIGenerate={async () => {
-                // TODO: 实现 AI 生成功能
-                console.log('AI 生成总结')
+                // AI 生成功能待实现
               }}
             />
           </CardContent>
@@ -251,28 +262,14 @@ export function LanguageFormDetail({
 
       {/* 证书图片 */}
       <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 pb-2">
-            <Camera className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">证书图片</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              上传语言证书图片，该图片将展示在语言记录封面和Web简历中。
-            </p>
-            <div className="flex justify-center">
-              <ImageUpload
-                value={preview}
-                onChange={(url) => {
-                  setPreview(url)
-                  handleInputChange('photo', url)
-                }}
-                disabled={!isEditing}
-                tip="点击上传证书图片"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <PhotoUploader
+          photos={formData.photos || []}
+          onChange={(photos) => handleInputChange('photos', photos)}
+          isEditing={isEditing}
+          maxPhotos={5}
+          title="证书图片"
+          description="上传语言证书图片，该图片将展示在语言记录封面和Web简历中。"
+        />
       </motion.div>
 
       {/* 保存/编辑按钮 */}

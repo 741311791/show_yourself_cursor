@@ -231,11 +231,12 @@ model Research {
 model ResearchResult {
   id          String   @id @default(cuid())
   userId      String
-  researchId  String
+  researchId  String?
   type        ResearchResultType
   name        String
-  role        String
+  role        String?
   date        String?
+  photos      String[]
   summary     String?
   customFields Json[]   // CustomField[]
   createdAt   DateTime @default(now())

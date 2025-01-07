@@ -7,7 +7,7 @@ import {
   ChevronDown, User, GraduationCap, Briefcase,
   Folder, Heart, Languages, Award, Medal,
   BookOpen, BookMarked, Plus, Globe, Code,
-  Pencil, Trash2
+  Pencil, Trash2, ScrollText
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { usePathname } from 'next/navigation'
@@ -53,9 +53,11 @@ const timelineMenuItems: MenuItem[] = [
     subItems: [
       { icon: User, label: "个人信息", href: "/timeline/profile" },
       { icon: GraduationCap, label: "教育经历", href: "/timeline/education" },
+      { icon: GraduationCap, label: "学生经历", href: "/timeline/student" },
       { icon: Briefcase, label: "工作经历", href: "/timeline/work" },
       { icon: Folder, label: "项目经历", href: "/timeline/project" },
       { icon: BookMarked, label: "科研经历", href: "/timeline/research" },
+      { icon: ScrollText, label: "研究成果", href: "/timeline/research-result" },
       { icon: Heart, label: "兴趣爱好", href: "/timeline/hobby" },
       { icon: Languages, label: "语言", href: "/timeline/languages" },
       { icon: Award, label: "技能", href: "/timeline/skills" },
@@ -147,7 +149,7 @@ export function SidebarMenus() {
   const removeBlock = useCustomBlockStore(state => state.removeBlock)
   const addBlock = useCustomBlockStore(state => state.addBlock)
   const pathname = usePathname()
-  
+
   const [openMenus, setOpenMenus] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebarOpenMenus')
@@ -405,13 +407,13 @@ export function SidebarMenus() {
       className="flex-1 px-4 sidebar-scroll"
     >
       <div className="space-y-6">
-        <div className="space-y-1">
+          <div className="space-y-1">
           <p className="text-xs font-medium text-muted-foreground px-4 mb-2">
             简历管理
           </p>
           {resumeMenuItems.map(renderMenuItem)}
           {allTimelineMenuItems.map(renderMenuItem)}
-        </div>
+          </div>
 
         {/* 支持 */}
         <div className="space-y-1">
@@ -451,7 +453,7 @@ export function SidebarMenus() {
             </Link>
           </Button>
         </div>
-      </div>
+    </div>
 
       <AlertDialog open={!!deleteBlockId} onOpenChange={() => setDeleteBlockId(null)}>
         <AlertDialogContent>

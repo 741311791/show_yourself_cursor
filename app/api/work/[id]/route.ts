@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
+import { revalidatePath } from 'next/cache'
 
 export async function GET(
   req: Request,
@@ -45,6 +46,8 @@ export async function PUT(
       data
     })
 
+    revalidatePath('/timeline/work')
+
     return NextResponse.json(work)
   } catch (error) {
     console.error('Update work error:', error)
@@ -67,6 +70,7 @@ export async function DELETE(
       }
     })
 
+    revalidatePath('/timeline/work')
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error('Delete work error:', error)
