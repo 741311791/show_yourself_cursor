@@ -4,9 +4,9 @@ import React, { useState } from "react"
 import { motion } from "motion/react"
 import { 
   Edit2, Save,
-  Trophy, Calendar, Medal,
-  FileText, Camera, Building,
-  Users, Crown, X
+  Trophy, Calendar, 
+  FileText, Medal,
+  Users, Star
 } from "lucide-react"
 import { Award } from "@/types/award"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { ImageUpload } from "@/components/shared/ImageUpload"
 import { Alert } from "@/components/shared/Alert"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
 import { PhotoUploader } from "@/components/timeline/shared/PhotoUploader"
@@ -36,17 +35,17 @@ const item = {
 }
 
 interface AwardFormDetailProps {
-  award: Award
-  onSave: (award: Award) => void
+  data: Award
+  onSave: (award: Award) => Promise<void>
   onCancel: () => void
 }
 
 export function AwardFormDetail({ 
-  award,
+  data,
   onSave,
   onCancel 
 }: AwardFormDetailProps) {
-  const [formData, setFormData] = useState<Award>(award)
+  const [formData, setFormData] = useState<Award>(data)
   const [isEditing, setIsEditing] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
@@ -59,6 +58,13 @@ export function AwardFormDetail({
     message: ''
   })
 
+  const showAlert = (type: 'success' | 'error', message: string) => {
+    setAlertState({ show: true, type, message })
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }))
+    }, 3000)
+  }
+
   const handleInputChange = (field: keyof Award, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
@@ -66,11 +72,23 @@ export function AwardFormDetail({
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      onSave(formData)
-      setIsEditing(false)
+
+      const response = await fetch(`/api/award/${data.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) {
+        throw new Error('保存失败')
+      }
+
+      const updatedAward = await response.json()
+      await onSave(updatedAward)
       showAlert('success', '保存成功')
+      setIsEditing(false)
     } catch (error) {
       console.error('保存失败:', error)
       showAlert('error', '保存失败，请重试')
@@ -83,13 +101,6 @@ export function AwardFormDetail({
     setIsEditing(true)
   }
 
-  const showAlert = (type: 'success' | 'error', message: string) => {
-    setAlertState({ show: true, type, message })
-    setTimeout(() => {
-      setAlertState(prev => ({ ...prev, show: false }))
-    }, 3000)
-  }
-
   return (
     <motion.div 
       className="max-w-3xl mx-auto space-y-8"
@@ -97,6 +108,7 @@ export function AwardFormDetail({
       animate="show"
       variants={container}
     >
+      {/* 返回按钮 */}
       <motion.div variants={item}>
         <Button
           variant="ghost"
@@ -116,10 +128,7 @@ export function AwardFormDetail({
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-6">
             <div className="col-span-2 space-y-2">
-              <Label className="flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-muted-foreground" />
-                奖项名称
-              </Label>
+              <Label>奖项名称</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
@@ -127,7 +136,7 @@ export function AwardFormDetail({
                 placeholder="请输入奖项名称"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Medal className="h-4 w-4 text-muted-foreground" />
                 获奖级别
@@ -139,9 +148,9 @@ export function AwardFormDetail({
                 placeholder="请输入获奖级别"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label className="flex items-center gap-2">
-                <Crown className="h-4 w-4 text-muted-foreground" />
+                <Star className="h-4 w-4 text-muted-foreground" />
                 获奖名次
               </Label>
               <Input
@@ -151,9 +160,9 @@ export function AwardFormDetail({
                 placeholder="请输入获奖名次"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label className="flex items-center gap-2">
-                <Building className="h-4 w-4 text-muted-foreground" />
+                <Trophy className="h-4 w-4 text-muted-foreground" />
                 颁发机构
               </Label>
               <Input
@@ -163,7 +172,7 @@ export function AwardFormDetail({
                 placeholder="请输入颁发机构"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 获奖时间
@@ -175,7 +184,7 @@ export function AwardFormDetail({
                 disabled={!isEditing}
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 参与人数
@@ -194,7 +203,7 @@ export function AwardFormDetail({
       {/* 自定义字段 */}
       <motion.div variants={item}>
         <CustomFieldsSection 
-          fields={formData.customFields}
+          fields={formData.customFields || []}
           onFieldsChange={(fields) => setFormData(prev => ({ ...prev, customFields: fields }))}
           disabled={!isEditing}
           isEditing={isEditing}
@@ -207,20 +216,19 @@ export function AwardFormDetail({
             }
             setFormData(prev => ({
               ...prev,
-              customFields: [...prev.customFields, newField]
+              customFields: [...(prev.customFields || []), newField]
             }))
           }}
           onRemove={(id) => {
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.filter(field => field.id !== id)
+              customFields: (prev.customFields || []).filter(field => field.id !== id)
             }))
           }}
           onUpdate={(id, field, value) => {
-            console.log('Updating field:', field, 'with value:', value)
             setFormData(prev => ({
               ...prev,
-              customFields: prev.customFields.map(item => 
+              customFields: (prev.customFields || []).map(item => 
                 item.id === id ? { ...item, [field]: value } : item
               )
             }))
@@ -235,14 +243,13 @@ export function AwardFormDetail({
             <FileText className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">获奖总结</h2>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <AIRichTextEditor 
-              content={formData.summary}
+              content={formData.summary || ''}
               onChange={(html) => handleInputChange('summary', html)}
               isEditing={isEditing}
               onAIGenerate={async () => {
-                // TODO: 实现 AI 生成能
-                console.log('AI 生成总结')
+                // AI 生成功能待实现
               }}
             />
           </CardContent>
@@ -252,12 +259,12 @@ export function AwardFormDetail({
       {/* 证书图片 */}
       <motion.div variants={item}>
         <PhotoUploader
-          title="证书图片"
-          description="上传获奖证书图片，这些图片将展示在获奖记录中。"
-          photos={formData.photos}
+          photos={formData.photos || []}
           onChange={(photos) => handleInputChange('photos', photos)}
           isEditing={isEditing}
-          maxPhotos={6}
+          maxPhotos={5}
+          title="证书图片"
+          description="上传获奖证书图片，该图片将展示在获奖记录封面和Web简历中。"
         />
       </motion.div>
 

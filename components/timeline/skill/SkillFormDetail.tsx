@@ -4,10 +4,9 @@ import React, { useState } from "react"
 import { motion } from "motion/react"
 import { 
   Award, Calendar, Star, Building,
-  FileText, Save, Edit2, Camera,
-  Plus, Code
+  FileText, Save, Edit2, Code
 } from "lucide-react"
-import { Skill, SkillWork, SkillLevel, SkillCategory } from "@/types/skill"
+import { Skill, SkillLevel, SkillCategory } from "@/types/skill"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,31 +20,28 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { PhotoWall } from "@/components/shared/PhotoWall"
 import { Alert } from "@/components/shared/Alert"
 import { CustomFieldsSection } from "@/components/shared/CustomFieldsSection"
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
-import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { SkillWorkItem } from './SkillWorkItem'
+import { PhotoUploader } from "@/components/timeline/shared/PhotoUploader"
 
 const skillLevels = [
-  { value: 'beginner', label: '初级' },
-  { value: 'intermediate', label: '中级' },
-  { value: 'advanced', label: '高级' },
-  { value: 'expert', label: '专家' }
+  { value: 'BEGINNER', label: '初级' },
+  { value: 'INTERMEDIATE', label: '中级' },
+  { value: 'ADVANCED', label: '高级' },
+  { value: 'EXPERT', label: '专家' }
 ]
 
 const skillCategories = [
-  { value: 'language', label: '语言' },
-  { value: 'programming', label: '编程' },
-  { value: 'design', label: '设计' },
-  { value: 'business', label: '商业' },
-  { value: 'other', label: '其他' }
+  { value: 'LANGUAGE', label: '语言' },
+  { value: 'PROGRAMMING', label: '编程' },
+  { value: 'DESIGN', label: '设计' },
+  { value: 'BUSINESS', label: '商业' },
+  { value: 'OTHER', label: '其他' }
 ]
 
 interface SkillFormDetailProps {
-  skill: Skill
-  onSave: (skill: Skill) => void
+  data: Skill
+  onSave: (skill: Skill) => Promise<void>
   onCancel: () => void
 }
 
@@ -66,11 +62,11 @@ const item = {
 }
 
 export function SkillFormDetail({
-  skill,
+  data,
   onSave,
   onCancel
 }: SkillFormDetailProps) {
-  const [formData, setFormData] = useState<Skill>(skill)
+  const [formData, setFormData] = useState<Skill>(data)
   const [isEditing, setIsEditing] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
@@ -85,70 +81,9 @@ export function SkillFormDetail({
 
   const handleInputChange = (
     field: keyof Skill, 
-    value: string | string[] | SkillLevel | SkillCategory | SkillWork[]
+    value: string | string[] | SkillLevel | SkillCategory
   ) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const addCustomField = () => {
-    const newField = {
-      id: Math.random().toString(),
-      title: '',
-      content: '',
-      icon: 'FileText'
-    }
-    setFormData(prev => ({
-      ...prev,
-      customFields: [...prev.customFields, newField]
-    }))
-  }
-
-  const removeCustomField = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      customFields: prev.customFields.filter(field => field.id !== id)
-    }))
-  }
-
-  const updateCustomField = (id: string, field: 'title' | 'content' | 'icon', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      customFields: prev.customFields.map(item => 
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    }))
-  }
-
-  const handleAddWork = () => {
-    const newWork: SkillWork = {
-      id: Math.random().toString(),
-      name: '',
-      date: '',
-      description: '',
-      photos: [],
-      customFields: [],
-      summary: ''
-    }
-    setFormData(prev => ({
-      ...prev,
-      works: [...prev.works, newWork]
-    }))
-  }
-
-  const handleUpdateWork = (index: number, updatedWork: SkillWork) => {
-    setFormData(prev => ({
-      ...prev,
-      works: prev.works.map((work, i) => 
-        i === index ? updatedWork : work
-      )
-    }))
-  }
-
-  const handleRemoveWork = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      works: prev.works.filter((_, i) => i !== index)
-    }))
   }
 
   const showAlert = (type: 'success' | 'error', message: string) => {
@@ -161,10 +96,23 @@ export function SkillFormDetail({
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      onSave(formData)
-      setIsEditing(false)
+
+      const response = await fetch(`/api/skill/${data.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) {
+        throw new Error('保存失败')
+      }
+
+      const updatedSkill = await response.json()
+      await onSave(updatedSkill)
       showAlert('success', '保存成功')
+      setIsEditing(false)
     } catch (error) {
       console.error('保存失败:', error)
       showAlert('error', '保存失败，请重试')
@@ -175,27 +123,6 @@ export function SkillFormDetail({
 
   const handleEdit = () => {
     setIsEditing(true)
-  }
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  )
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    if (active.id !== over?.id) {
-      setFormData((prev) => {
-        const oldIndex = prev.works.findIndex((w) => w.id === active.id)
-        const newIndex = prev.works.findIndex((w) => w.id === over?.id)
-        const newWorks = [...prev.works]
-        const [removed] = newWorks.splice(oldIndex, 1)
-        newWorks.splice(newIndex, 0, removed)
-        return { ...prev, works: newWorks }
-      })
-    }
   }
 
   return (
@@ -322,60 +249,40 @@ export function SkillFormDetail({
         </Card>
       </motion.div>
 
-      {/* 自定义信息 */}
+      {/* 自定义字段 */}
       <motion.div variants={item}>
-        <CustomFieldsSection
-          fields={formData.customFields}
+        <CustomFieldsSection 
+          fields={formData.customFields || []}
+          onFieldsChange={(fields) => setFormData(prev => ({ ...prev, customFields: fields }))}
+          disabled={!isEditing}
           isEditing={isEditing}
-          onAdd={addCustomField}
-          onRemove={removeCustomField}
-          onUpdate={updateCustomField}
+          onAdd={() => {
+            const newField = {
+              id: Math.random().toString(),
+              title: '',
+              content: '',
+              icon: 'FileText'
+            }
+            setFormData(prev => ({
+              ...prev,
+              customFields: [...(prev.customFields || []), newField]
+            }))
+          }}
+          onRemove={(id) => {
+            setFormData(prev => ({
+              ...prev,
+              customFields: (prev.customFields || []).filter(field => field.id !== id)
+            }))
+          }}
+          onUpdate={(id, field, value) => {
+            setFormData(prev => ({
+              ...prev,
+              customFields: (prev.customFields || []).map(item => 
+                item.id === id ? { ...item, [field]: value } : item
+              )
+            }))
+          }}
         />
-      </motion.div>
-
-      {/* 作品集 */}
-      <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold">作品集</h2>
-            </div>
-            {isEditing && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAddWork}
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                添加作品
-              </Button>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={formData.works.map(w => w.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                {formData.works.map((work, index) => (
-                  <SkillWorkItem
-                    key={work.id}
-                    work={work}
-                    isEditing={isEditing}
-                    onUpdate={(updatedWork) => handleUpdateWork(index, updatedWork)}
-                    onRemove={() => handleRemoveWork(index)}
-                  />
-                ))}
-              </SortableContext>
-            </DndContext>
-          </CardContent>
-        </Card>
       </motion.div>
 
       {/* 技能总结 */}
@@ -387,35 +294,27 @@ export function SkillFormDetail({
           </CardHeader>
           <CardContent>
             <AIRichTextEditor
-              content={formData.summary}
+              content={formData.summary || ''}
               onChange={(html) => handleInputChange('summary', html)}
               isEditing={isEditing}
               onAIGenerate={async () => {
-                console.log('AI 生成技能总结')
+                // AI 生成功能待实现
               }}
             />
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* 照片墙 */}
+      {/* 相关图片 */}
       <motion.div variants={item}>
-        <Card>
-          <CardHeader className="flex-row items-center gap-2 pb-2">
-            <Camera className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">照片墙</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground text-center">
-              上传与该技能相关的照片，可以是证书、作品、学习过程等。这些照片将展示在技能列表和Web简历中。
-            </p>
-            <PhotoWall
-              photos={formData.photos}
-              onChange={(photos) => handleInputChange('photos', photos)}
-              disabled={!isEditing}
-            />
-          </CardContent>
-        </Card>
+        <PhotoUploader
+          photos={formData.photos || []}
+          onChange={(photos) => handleInputChange('photos', photos)}
+          isEditing={isEditing}
+          maxPhotos={5}
+          title="相关图片"
+          description="上传技能相关图片，如证书、作品等。这些图片将展示在技能列表和Web简历中。"
+        />
       </motion.div>
 
       {/* 保存/编辑按钮 */}

@@ -34,17 +34,17 @@ const item = {
 }
 
 interface ResearchFormDetailProps {
-  research: Research
-  onSave: (research: Research) => void
+  data: Research
+  onSave: (research: Research) => Promise<void>
   onCancel: () => void
 }
 
 export function ResearchFormDetail({
-  research,
+  data,
   onSave,
   onCancel
 }: ResearchFormDetailProps) {
-  const [formData, setFormData] = useState<Research>(research)
+  const [formData, setFormData] = useState<Research>(data)
   const [isEditing, setIsEditing] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [alertState, setAlertState] = useState<{
@@ -104,7 +104,7 @@ export function ResearchFormDetail({
     try {
       setIsSaving(true)
 
-      const response = await fetch(`/api/research/${research.id}`, {
+      const response = await fetch(`/api/research/${data.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

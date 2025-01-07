@@ -16,7 +16,7 @@ export interface ResearchResult {
 
 export interface Research {
   id?: string
-  direction?: string
+  direction: string
   institution?: string
   role?: string
   startDate?: string

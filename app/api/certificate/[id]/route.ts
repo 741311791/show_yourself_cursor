@@ -6,18 +6,18 @@ import { revalidatePath } from "next/cache"
 // 获取特定证书
 export async function GET(
   req: Request,
-  context: { params: Promise<{ certificateId: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth()
-    const { certificateId } = await context.params
+    const { id } = await context.params
     if (!user?.id) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
     const certificate = await prisma.certificate.findUnique({
       where: {
-        id: certificateId,
+        id: id,
         userId: user.id
       }
     })
@@ -34,9 +34,9 @@ export async function GET(
 }
 
 // 更新证书
-export async function PATCH(
+export async function PUT(
   req: Request,
-  context: { params: Promise<{ certificateId: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth()
@@ -45,22 +45,13 @@ export async function PATCH(
     }
 
     const json = await req.json()
-    const { certificateId } = await context.params
+    const { id } = await context.params
     const updatedCertificate = await prisma.certificate.update({
       where: {
-        id: certificateId,
+        id: id,
         userId: user.id
       },
-      data: {
-        name: json.name,
-        issuer: json.issuer,
-        date: json.date,
-        level: json.level,
-        number: json.number,
-        photos: json.photos,
-        summary: json.summary,
-        customFields: json.customFields
-      }
+      data: json
     })
 
     revalidatePath('/timeline/certificate')
@@ -74,7 +65,7 @@ export async function PATCH(
 // 删除证书
 export async function DELETE(
   req: Request,
-  context: { params: Promise<{ certificateId: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth()
@@ -82,10 +73,10 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    const { certificateId } = await context.params
+    const { id } = await context.params
     await prisma.certificate.delete({
       where: {
-        id: certificateId,
+        id: id,
         userId: user.id
       }
     })

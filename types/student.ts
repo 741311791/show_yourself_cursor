@@ -1,13 +1,13 @@
 import { CustomField } from "./shared"
 
-export type StudentType = 'STUDENT' | 'GRADUATE' | 'OTHER'
+export type ActivityType = 'CLUB' | 'COMPETITION' | 'VOLUNTEER' | 'OTHER'
 
 export interface Student {
-  id: string
+  id?: string
   userId: string
   educationId?: string
-  type: StudentType
-  name: string           // 活动/项目名称
+  activityType?: ActivityType
+  activityName: string           // 活动/项目名称
   organization?: string   // 组织/社团名称
   role?: string          // 担任角色
   startDate?: string
@@ -18,3 +18,18 @@ export interface Student {
   photos?: string[]
   customFields?: CustomField[]
 } 
+
+export const defaultStudent: Student = {
+  userId: '',
+  activityName: '',
+  activityType: 'OTHER',
+  organization: '',
+  role: '',
+  startDate: '',
+  endDate: '',
+  description: '',
+  achievement: '',
+  summary: '',
+  photos: [],
+  customFields: [],
+}
