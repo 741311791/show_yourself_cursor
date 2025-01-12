@@ -30,3 +30,7 @@ export const defaultResumeDetail: ResumeDetail = {
   metadata: defaultResumeMetadata,
 }
 
+export interface ResumeAction {
+  type: 'edit' | 'rename' | 'duplicate' | 'delete' | 'export'
+  resume?: Resume
+}

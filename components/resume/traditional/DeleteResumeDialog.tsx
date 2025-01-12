@@ -19,7 +19,7 @@ interface DeleteResumeDialogProps {
   resume: Resume | undefined
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSuccess?: () => void
+  onSuccess?: () => Promise<void>
 }
 
 export function DeleteResumeDialog({
@@ -36,7 +36,10 @@ export function DeleteResumeDialog({
     try {
       setIsProcessing(true)
       const response = await fetch(`/api/resumes/${resume.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
 
       if (!response.ok) {
@@ -44,8 +47,9 @@ export function DeleteResumeDialog({
       }
       
       toast.success('简历已删除')
-      onSuccess?.()
-      onOpenChange(false)
+      if (onSuccess) {
+        await onSuccess()
+      }
     } catch (err) {
       console.error('删除简历失败:', err)
       toast.error(err instanceof Error ? err.message : '删除失败')
@@ -55,33 +59,40 @@ export function DeleteResumeDialog({
   }
 
   return (
-    <AlertDialog 
-      open={open}
-      onOpenChange={() => !isProcessing && onOpenChange(false)}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>确认删除</AlertDialogTitle>
-          <AlertDialogDescription>
-            确定要删除简历"{resume?.name}"吗？此操作无法撤销。
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => !isProcessing && onOpenChange(false)}>
-            取消
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleConfirm}
-            disabled={isProcessing}
-            className={cn(
-              "bg-destructive hover:bg-destructive/90",
-              isProcessing && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            {isProcessing ? '删除中...' : '确认删除'}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <AlertDialog open={!!deleteId}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              此操作不可撤销，确定要删除吗？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => setDeleteId(null)}
+              disabled={isDeleting}
+            >
+              取消
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteId && handleDelete(deleteId)}
+              disabled={isDeleting}
+              className={cn(
+                "bg-destructive hover:bg-destructive/90",
+                isDeleting && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  删除中...
+                </>
+              ) : (
+                "确认删除"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
   )
 } 

@@ -11,13 +11,13 @@ import {
   Pencil,
   Copy,
   FileDown,
-  Image,
+  
   FileJson,
   Trash2,
   Type
 } from "lucide-react"
 import { Resume } from "@/types/resume"
-import { ResumeAction } from "./ResumeDropdownMenu"
+import { ResumeAction } from "@/types/resume"
 
 interface ResumeContextMenuProps {
   children: React.ReactNode
@@ -49,15 +49,15 @@ export function ResumeContextMenu({
           复制
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={() => onAction({ type: 'export', format: 'pdf' })}>
+        <ContextMenuItem onClick={() => onAction({ type: 'export', resume })}>
           <FileDown className="mr-2 h-4 w-4" />
           下载 PDF
         </ContextMenuItem>
-        <ContextMenuItem onClick={() => onAction({ type: 'export', format: 'image' })}>
-          <Image className="mr-2 h-4 w-4" />
+        <ContextMenuItem onClick={() => onAction({ type: 'export', resume })}>
+          <FileDown className="mr-2 h-4 w-4" />
           下载图片
         </ContextMenuItem>
-        <ContextMenuItem onClick={() => onAction({ type: 'export', format: 'json' })}>
+        <ContextMenuItem onClick={() => onAction({ type: 'export', resume })}>
           <FileJson className="mr-2 h-4 w-4" />
           导出 JSON
         </ContextMenuItem>

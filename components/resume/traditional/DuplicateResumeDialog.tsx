@@ -10,14 +10,14 @@ import { toast } from "sonner"
 interface DuplicateResumeDialogProps {
   resume: Resume | undefined
   open: boolean
-  onOpenChange: (open: boolean) => void
+  // onOpenChange: (open: boolean) => void
   onSuccess?: () => void
 }
 
 export function DuplicateResumeDialog({
   resume,
   open,
-  onOpenChange,
+  // onOpenChange,
   onSuccess
 }: DuplicateResumeDialogProps) {
   const [isProcessing, setIsProcessing] = useState(false)
@@ -26,11 +26,14 @@ export function DuplicateResumeDialog({
   useEffect(() => {
     if (resume && open) {
       setNewName(`${resume.name} 的副本`)
+    } else if (!open) {
+      setNewName('')
+      setIsProcessing(false)
     }
   }, [resume, open])
 
   const handleConfirm = async () => {
-    if (!resume || !newName.trim()) return
+    if (!resume || !newName.trim() || isProcessing) return
     
     try {
       setIsProcessing(true)
@@ -57,22 +60,18 @@ export function DuplicateResumeDialog({
       toast.error(err instanceof Error ? err.message : '复制失败')
     } finally {
       setIsProcessing(false)
-      onOpenChange(false)
-      setNewName('')
+      // onOpenChange(false)
     }
   }
 
   return (
     <Dialog 
       open={open}
-      onOpenChange={(open) => {
-        if (!isProcessing) {
-          if (!open) {
-            setNewName('')
-          }
-          onOpenChange(open)
-        }
-      }}
+      // onOpenChange={(open) => {
+      //   if (!isProcessing) {
+      //     onOpenChange(open)
+      //   }
+      // }}
     >
       <DialogContent>
         <DialogHeader>
@@ -83,6 +82,7 @@ export function DuplicateResumeDialog({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="请输入新的简历名称"
+            disabled={isProcessing}
           />
         </div>
         <DialogFooter>

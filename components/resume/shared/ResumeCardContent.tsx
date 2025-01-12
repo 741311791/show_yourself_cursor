@@ -6,13 +6,11 @@ import { Resume } from "@/types/resume"
 
 interface ResumeCardContentProps {
   title: string
-  description?: string
   resume?: Resume
 }
 
 export function ResumeCardContent({
   title,
-  description,
   resume,
 }: ResumeCardContentProps) {
   return (
@@ -20,9 +18,6 @@ export function ResumeCardContent({
       <div className="flex items-start justify-between gap-2">
         <div className="flex-grow min-w-0">
           <h6 className="text-sm font-medium text-foreground truncate">{title}</h6>
-          {description && (
-            <p className="text-xs text-muted-foreground truncate">{description}</p>
-          )}
         </div>
       </div>
 

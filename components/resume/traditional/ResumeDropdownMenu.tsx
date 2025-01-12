@@ -20,13 +20,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Resume } from "@/types/resume"
+import { ResumeAction } from "@/types/resume"
 
-export type ResumeAction = 
-  | { type: 'edit'; resume: Resume }
-  | { type: 'rename'; resume: Resume }
-  | { type: 'duplicate'; resume: Resume }
-  | { type: 'delete'; resume: Resume }
-  | { type: 'export'; format: 'pdf' | 'image' | 'json' }
 
 interface ResumeDropdownMenuProps {
   resume: Resume
@@ -62,15 +57,15 @@ export function ResumeDropdownMenu({ resume, onAction }: ResumeDropdownMenuProps
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onAction({ type: 'export', format: 'pdf' })}>
+          <DropdownMenuItem onClick={() => onAction({ type: 'export', resume })}>
             <FileDown className="mr-2 h-4 w-4" />
             下载 PDF
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAction({ type: 'export', format: 'image' })}>
+          <DropdownMenuItem onClick={() => onAction({ type: 'export', resume })}>
             <Image className="mr-2 h-4 w-4" />
             下载图片
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAction({ type: 'export', format: 'json' })}>
+          <DropdownMenuItem onClick={() => onAction({ type: 'export', resume })}>
             <FileJson className="mr-2 h-4 w-4" />
             导出 JSON
           </DropdownMenuItem>

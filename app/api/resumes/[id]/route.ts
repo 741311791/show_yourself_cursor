@@ -56,7 +56,7 @@ export async function PUT(
   }
 }
 
-
+// 更新简历名称
 export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -76,9 +76,13 @@ export async function PATCH(
       }
     })
 
-    // revalidatePath('/resume/traditional')
-
-    return NextResponse.json(resume)
+    // 添加响应头
+    return NextResponse.json(resume, {
+      headers: {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'application/json',
+      }
+    })
   } catch (error) {
     console.error('Update resume error:', error)
     return new NextResponse('Internal error', { status: 500 })

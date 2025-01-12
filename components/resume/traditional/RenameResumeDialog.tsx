@@ -54,7 +54,6 @@ export function RenameResumeDialog({
     } finally {
       setIsProcessing(false)
       onOpenChange(false)
-      setNewName('')
     }
   }
 
