@@ -21,9 +21,16 @@ import {
 import { Button } from "@/components/ui/button"
 import { Resume } from "@/types/resume"
 
+export type ResumeAction = 
+  | { type: 'edit'; resume: Resume }
+  | { type: 'rename'; resume: Resume }
+  | { type: 'duplicate'; resume: Resume }
+  | { type: 'delete'; resume: Resume }
+  | { type: 'export'; format: 'pdf' | 'image' | 'json' }
+
 interface ResumeDropdownMenuProps {
   resume: Resume
-  onAction?: (action: ResumeAction) => void
+  onAction: (action: ResumeAction) => void
 }
 
 export function ResumeDropdownMenu({ resume, onAction }: ResumeDropdownMenuProps) {
@@ -40,37 +47,37 @@ export function ResumeDropdownMenu({ resume, onAction }: ResumeDropdownMenuProps
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onAction?.('rename')}>
+          <DropdownMenuItem onClick={() => onAction({ type: 'rename', resume })}>
             <Type className="mr-2 h-4 w-4" />
             重命名
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAction?.('edit')}>
+          <DropdownMenuItem onClick={() => onAction({ type: 'edit', resume })}>
             <Pencil className="mr-2 h-4 w-4" />
             编辑
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAction?.('duplicate')}>
+          <DropdownMenuItem onClick={() => onAction({ type: 'duplicate', resume })}>
             <Copy className="mr-2 h-4 w-4" />
             复制
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onAction?.('export')}>
+          <DropdownMenuItem onClick={() => onAction({ type: 'export', format: 'pdf' })}>
             <FileDown className="mr-2 h-4 w-4" />
             下载 PDF
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAction?.('export')}>
+          <DropdownMenuItem onClick={() => onAction({ type: 'export', format: 'image' })}>
             <Image className="mr-2 h-4 w-4" />
             下载图片
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAction?.('export')}>
+          <DropdownMenuItem onClick={() => onAction({ type: 'export', format: 'json' })}>
             <FileJson className="mr-2 h-4 w-4" />
             导出 JSON
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
-          onClick={() => onAction?.('delete')}
+          onClick={() => onAction({ type: 'delete', resume })}
           className="text-destructive focus:text-destructive"
         >
           <Trash2 className="mr-2 h-4 w-4" />

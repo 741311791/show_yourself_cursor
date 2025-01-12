@@ -4,7 +4,7 @@ import React, { useState } from "react"
 import { motion } from "motion/react"
 import { 
   BookMarked, MapPin, Calendar, User,
-  FileText, Save, Edit2, Camera
+  FileText, Save, Edit2
 } from "lucide-react"
 import { Research } from "@/types/research"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"

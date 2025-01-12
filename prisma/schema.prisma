@@ -55,6 +55,11 @@ enum SkillLevel {
   EXPERT
 }
 
+enum CustomBlockType {
+  PAGE
+  TIMELINE
+}
+
 model User {
   id          String    @id @default(cuid())
   username    String
@@ -319,6 +324,46 @@ model Publication {
   photos      String[]
   summary     String?
   customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model CustomBlock {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  route       String
+  type        CustomBlockType
+  icon        String?
+  fields      Json[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CustomBlockForm {
+  id          String   @id @default(cuid())
+  userId      String
+  blockId     String
+  fields      Json[]
+  summary     String?
+  photos      String[]
+  customFields Json[]   // CustomField[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Resume {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  isPublic    Boolean
+  thumbnailUrl String
+  sections     Json[]
+  metadata     Json[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

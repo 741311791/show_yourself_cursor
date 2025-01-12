@@ -5,7 +5,8 @@ export type CustomBlockType = 'page' | 'timeline'
 export interface CustomBlockField {
   id: string
   label: string
-  type: 'text' | 'date' | 'textarea'
+  icon: string
+  fieldType: 'text' | 'date' | 'textarea'
   required?: boolean
 }
 
@@ -16,17 +17,20 @@ export interface CustomBlock {
   type: CustomBlockType // 展示形式
   icon?: string         // 图标
   fields: CustomBlockField[] // 自定义字段
-  createdAt: string
-  updatedAt: string
 }
 
-export interface CustomBlockItem {
-  id: string
-  blockId: string      // 关联的自定义块ID
+export interface CustomBlockForm {
+  id?: string
+  blockId?: string      // 关联的自定义块ID
   fields: Record<string, string> // 字段值
   customFields: CustomField[]
   summary: string
   photos: string[]
-  createdAt: string
-  updatedAt: string
 } 
+
+export const defaultCustomBlockForm: CustomBlockForm = {
+  fields: {},
+  customFields: [],
+  summary: "",
+  photos: []
+}

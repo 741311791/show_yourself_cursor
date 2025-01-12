@@ -12,7 +12,6 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
-
 import logo from '@/public/logo.svg'
 
 const navItems = [
@@ -66,6 +65,32 @@ export function Navbar() {
             ))}
           </NavigationMenuList>
         </NavigationMenu>
+
+        {/* Language Selector */}
+        {/* <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+            >
+              <Globe className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {Object.entries(languages).map(([locale, { label, flag }]) => (
+              <DropdownMenuItem
+                key={locale}
+                onClick={() => {
+                  router.replace(`/${locale}${pathname}`)
+                }}
+              >
+                <span className="mr-2">{flag}</span>
+                {label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu> */}
 
         {/* Auth Buttons */}
         <div className="ml-auto flex items-center space-x-4">

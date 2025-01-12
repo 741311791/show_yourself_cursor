@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { motion } from "motion/react"
 import { 
-  BookOpen, Calendar, FileText, Save, Edit2
+  BookOpen, FileText, Save, Edit2
 } from "lucide-react"
 import { ResearchResult } from "@/types/research"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"

@@ -2,18 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { Panel, PanelGroup, PanelResizeHandle } from "@/components/ui/panel"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useBreakpoint } from "@/hooks/useBreakpoint"
-import { ResumeToolbar } from "@/components/resume/builder/ResumeToolbar"
-import { LeftSidebar } from "@/components/resume/builder/sidebars/LeftSidebar"
-import { RightSidebar } from "@/components/resume/builder/sidebars/RightSidebar"
-import { 
-  ResumeDetail, 
-  ResumeEditorState, 
-  ResumeTemplate,
-  ExportFormat 
-} from "@/types/resume"
+import { LeftSidebar } from "./sidebars/LeftSidebar"
+import { RightSidebar } from "./sidebars/RightSidebar"
+import { useResumeStore } from "@/store/useResumeStore"
+import { toast } from "sonner"
 
 interface ResumeBuilderClientProps {
   id: string
@@ -22,73 +16,34 @@ interface ResumeBuilderClientProps {
 export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
   const [mounted, setMounted] = useState(false)
   const { isDesktop } = useBreakpoint()
-  const [state, setState] = useState<ResumeEditorState>({
-    data: null,
-    template: 'modern',
-    scale: 1,
-    isDirty: false
-  })
+  const setResumeData = useResumeStore(state => state.setResumeData)
 
+  // 侧边栏拖拽状态
   const [leftDragging, setLeftDragging] = useState(false)
   const [rightDragging, setRightDragging] = useState(false)
-  const [leftSize, setLeftSize] = useState(30)
-  const [rightSize, setRightSize] = useState(30)
-
-  const [sheet, setSheet] = useState({
-    left: { open: false },
-    right: { open: false }
-  })
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // 获取简历数据并初始化 store
   useEffect(() => {
     const fetchResume = async () => {
       try {
-        const mockData: ResumeDetail = {
-          id,
-          name: "示例简历",
-          createdBy: "admin",
-          updatedAt: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          profile: undefined,
-          education: [],
-          work: [],
-          projects: [],
-          research: [],
-          hobbies: [],
-          languages: [],
-          skills: [],
-          awards: [],
-          certificates: [],
-          publications: [],
-          customBlocks: []
+        const response = await fetch(`/api/resumes/${id}`)
+        if (!response.ok) {
+          throw new Error('获取简历失败')
         }
-        setState(prev => ({ ...prev, data: mockData }))
+        const data = await response.json()
+        setResumeData(data)
       } catch (error) {
         console.error('获取简历失败:', error)
+        toast.error('获取简历失败，请刷新重试')
       }
     }
 
     fetchResume()
-  }, [id])
-
-  const handleUpdate = (data: Partial<ResumeDetail>) => {
-    setState(prev => ({
-      ...prev,
-      data: prev.data ? { ...prev.data, ...data } : null,
-      isDirty: true
-    }))
-  }
-
-  const handleTemplateChange = (template: ResumeTemplate) => {
-    setState(prev => ({ ...prev, template }))
-  }
-
-  const handleExport = async (format: ExportFormat) => {
-    console.log('导出格式:', format)
-  }
+  }, [id, setResumeData])
 
   function WhiteboardPlaceholder() {
     return (
@@ -101,25 +56,11 @@ export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
     )
   }
 
-  const MainContent = () => (
-    <div className="relative flex h-screen flex-col">
-      <ResumeToolbar
-        onExport={handleExport}
-        onTemplateChange={handleTemplateChange}
-        isDirty={state.isDirty}
-      />
-
-      <div className="flex-1 overflow-auto bg-muted/30 p-6">
-        <WhiteboardPlaceholder />
-      </div>
-    </div>
-  )
-
   if (!mounted) {
     return null
   }
 
-  return isDesktop ? (
+  return (
     <div className="relative h-screen overflow-hidden">
       <PanelGroup direction="horizontal">
         <Panel
@@ -130,7 +71,6 @@ export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
             "z-10 bg-background",
             !leftDragging && "transition-[flex]"
           )}
-          onResize={setLeftSize}
         >
           <LeftSidebar />
         </Panel>
@@ -159,47 +99,10 @@ export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
             "z-10 bg-background",
             !rightDragging && "transition-[flex]"
           )}
-          onResize={setRightSize}
         >
           <RightSidebar />
         </Panel>
       </PanelGroup>
-    </div>
-  ) : (
-    <div className="relative">
-      <Sheet
-        open={sheet.left.open}
-        onOpenChange={(open) => setSheet(prev => ({
-          ...prev,
-          left: { open }
-        }))}
-      >
-        <SheetContent
-          side="left"
-          showClose={false}
-          className="top-16 p-0 sm:max-w-xl"
-        >
-          <LeftSidebar />
-        </SheetContent>
-      </Sheet>
-
-      <MainContent />
-
-      <Sheet
-        open={sheet.right.open}
-        onOpenChange={(open) => setSheet(prev => ({
-          ...prev,
-          right: { open }
-        }))}
-      >
-        <SheetContent
-          side="right"
-          showClose={false}
-          className="top-16 p-0 sm:max-w-xl"
-        >
-          <RightSidebar />
-        </SheetContent>
-      </Sheet>
     </div>
   )
 } 
