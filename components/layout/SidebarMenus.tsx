@@ -7,7 +7,7 @@ import {
   ChevronDown, User, GraduationCap, Briefcase,
   Folder, Heart, Languages, Award, Medal,
   BookOpen, BookMarked, Plus, Globe, Code,
-  Pencil, Trash2, ScrollText, UserRound
+  Trash2, ScrollText, UserRound
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { usePathname } from 'next/navigation'
@@ -51,7 +51,7 @@ const timelineMenuItems: MenuItem[] = [
     label: "个人履历",
     href: "/timeline",
     subItems: [
-      { icon: User, label: "个人信息", href: "/timeline/profile" },
+      { icon: User, label: "基本信息", href: "/timeline/profile" },
       { icon: GraduationCap, label: "教育经历", href: "/timeline/education" },
       { icon: UserRound, label: "学生经历", href: "/timeline/student" },
       { icon: Briefcase, label: "工作经历", href: "/timeline/work" },

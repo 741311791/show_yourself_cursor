@@ -10,14 +10,14 @@ import { toast } from "sonner"
 interface DuplicateResumeDialogProps {
   resume: Resume | undefined
   open: boolean
-  // onOpenChange: (open: boolean) => void
+  onOpenChange: (open: boolean) => void
   onSuccess?: () => void
 }
 
 export function DuplicateResumeDialog({
   resume,
   open,
-  // onOpenChange,
+  onOpenChange,
   onSuccess
 }: DuplicateResumeDialogProps) {
   const [isProcessing, setIsProcessing] = useState(false)
@@ -37,7 +37,7 @@ export function DuplicateResumeDialog({
     
     try {
       setIsProcessing(true)
-      const response = await fetch('/api/resumes', {
+      const response = await fetch('/api/resume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -60,18 +60,18 @@ export function DuplicateResumeDialog({
       toast.error(err instanceof Error ? err.message : '复制失败')
     } finally {
       setIsProcessing(false)
-      // onOpenChange(false)
+      onOpenChange(false)
     }
   }
 
   return (
     <Dialog 
       open={open}
-      // onOpenChange={(open) => {
-      //   if (!isProcessing) {
-      //     onOpenChange(open)
-      //   }
-      // }}
+      onOpenChange={(open) => {
+        if (!isProcessing) {
+          onOpenChange(open)
+        }
+      }}
     >
       <DialogContent>
         <DialogHeader>

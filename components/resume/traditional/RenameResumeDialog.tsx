@@ -34,7 +34,7 @@ export function RenameResumeDialog({
     
     try {
       setIsProcessing(true)
-      const response = await fetch(`/api/resumes/${resume.id}`, {
+      const response = await fetch(`/api/resume/${resume.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName })

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { motion } from "motion/react"
-import { FileText, Calendar, Plus, Save, Edit2, Trash2 } from "lucide-react"
+import { FileText, Calendar, Save, Edit2 } from "lucide-react"
 import { Hobby } from "@/types/hobby"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { Button } from "@/components/ui/button"

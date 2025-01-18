@@ -110,20 +110,20 @@ export interface ResearchResultSection extends ResearchResult {
 }
 
 export interface ResumeSection {
-    profile: ProfileSection
-    education: EducationSection
-    work: WorkSection
-    project: ProjectSection
-    research: ResearchSection
-    hobby: HobbySection
-    language: LanguageSection
-    skill: SkillSection
-    award: AwardSection
-    certificate: CertificateSection
-    publication: PublicationSection
-    customBlock: CustomBlockSection
-    student: StudentSection
-    researchResult: ResearchResultSection
+    profile?: ProfileSection
+    education?: EducationSection
+    work?: WorkSection
+    project?: ProjectSection
+    research?: ResearchSection
+    hobby?: HobbySection
+    language?: LanguageSection
+    skill?: SkillSection
+    award?: AwardSection
+    certificate?: CertificateSection
+    publication?: PublicationSection
+    customBlock?: CustomBlockSection
+    student?: StudentSection
+    researchResult?: ResearchResultSection
 }
 
 export const defaultProfileSection: ProfileSection = {

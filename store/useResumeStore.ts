@@ -26,12 +26,11 @@ interface ResumeStore {
 }
 
 export const useResumeStore = create<ResumeStore>()(
-  subscribeWithSelector((set, get) => ({
+  subscribeWithSelector((set) => ({
     resumeData: null,
 
     // 设置整个简历数据
     setResumeData: (data) => {
-      console.log('Setting resume data:', data)
       set({ resumeData: data })
     },
 
@@ -54,26 +53,21 @@ export const useResumeStore = create<ResumeStore>()(
       }),
 
     // 更新简历内容区域
-    updateSection: (sectionKey, data) => 
+    updateSection: (sectionKey, data) => {
       set((state) => {
         if (!state.resumeData) return state
 
-        const newData = {
-          ...state.resumeData,
-          sections: {
-            ...state.resumeData.sections,
-            [sectionKey]: data
+        return {
+          resumeData: {
+            ...state.resumeData,
+            sections: {
+              ...state.resumeData.sections,
+              [sectionKey]: data
+            }
           }
         }
-
-        console.log('Updating section:', {
-          section: sectionKey,
-          changes: data,
-          newData: newData.sections[sectionKey]
-        })
-
-        return { resumeData: newData }
-      }),
+      })
+    },
 
     // 更新元数据/布局配置
     updateMetadata: (key, value) =>

@@ -37,7 +37,7 @@ export function ResumeContainer() {
     try {
       setIsLoading(true)
       setError(null)
-      const response = await fetch('/api/resumes', {
+      const response = await fetch('/api/resume', {
         headers: {
           'Cache-Control': 'no-cache',
         }
@@ -85,7 +85,17 @@ export function ResumeContainer() {
 
   const handleOperationSuccess = async () => {
     console.log('✨ 操作成功，准备刷新数据')
-    await handleRefresh()
+    try {
+      setIsLoading(true)
+      await fetchResumes()
+      console.log('✅ 数据刷新成功')
+    } catch (err) {
+      console.error('❌ 刷新数据失败:', err)
+      toast.error('刷新失败，请重试')
+    } finally {
+      setIsLoading(false)
+      handleDialogClose()
+    }
   }
 
   const handleRefresh = async () => {
@@ -94,14 +104,12 @@ export function ResumeContainer() {
       return
     }
 
-    console.log('🔄 开始刷新数据')
     try {
       setIsLoading(true)
       await fetchResumes()
       toast.success('刷新成功')
-      console.log('✅ 刷新数据成功')
     } catch (err) {
-      console.error('❌ 刷新数据失败:', err)
+      console.error('❌ 刷新失败:', err)
       toast.error('刷新失败，请重试')
     } finally {
       setIsLoading(false)
@@ -224,7 +232,7 @@ export function ResumeContainer() {
       <DuplicateResumeDialog 
         resume={dialog.type === 'duplicate' ? dialog.resume : undefined}
         open={dialog.type === 'duplicate'}
-        // onOpenChange={ open => !open && handleDialogClose() }
+        onOpenChange={handleDialogClose}
         onSuccess={handleOperationSuccess}
       />
 
@@ -233,6 +241,7 @@ export function ResumeContainer() {
         open={dialog.type === 'delete'}
         onOpenChange={handleDialogClose}
         onSuccess={handleOperationSuccess}
+        isParentLoading={isLoading}
       />
 
       <CreateResumeDialog 

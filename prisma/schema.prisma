@@ -359,11 +359,11 @@ model CustomBlockForm {
 model Resume {
   id          String   @id @default(cuid())
   userId      String
-  name        String
-  isPublic    Boolean
-  thumbnailUrl String
-  sections     Json[]
-  metadata     Json[]
+  name        String?
+  isPublic    Boolean @default(false)
+  thumbnailUrl String?
+  sections     Json?
+  metadata     Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

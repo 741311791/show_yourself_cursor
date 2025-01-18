@@ -1,37 +1,33 @@
 "use client"
 
 import { useRef } from "react"
-import { useResumeStore } from "@/store/useResumeStore"
-import { ProfileSection } from "@/components/resume/sections/ProfileSection"
-import { EducationSection } from "@/components/resume/sections/EducationSection"
-import { WorkSection } from "@/components/resume/sections/WorkSection"
-import { ProjectSection } from "@/components/resume/sections/ProjectSection"
+import { ProfileSec } from "@/components/resume/sections/ProfileSec"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
-  User, FileText, Medal, Share2, Briefcase,
+  User, Medal, Briefcase,
   GraduationCap, Award, Gamepad2, Languages,
-  Puzzle, BookOpen, Wrench, Users
+  Puzzle, BookOpen, Wrench, ScrollText, UserRound
 } from "lucide-react"
 
 // 定义部分配置
 const sections = [
   { id: 'profile', icon: User, title: "基本信息" },
   { id: 'education', icon: GraduationCap, title: "教育经历" },
+  { id: 'student', icon: UserRound, title: "学生经历" },
   { id: 'work', icon: Briefcase, title: "工作经历" },
   { id: 'projects', icon: Puzzle, title: "项目经历" },
+  { id: 'research', icon: BookOpen, title: "研究经历" },
+  { id: 'researchResult', icon: ScrollText, title: "研究成果" },
+  { id: 'languages', icon: Languages, title: "语言能力" },
+  { id: 'interests', icon: Gamepad2, title: "兴趣爱好" },
   { id: 'skills', icon: Wrench, title: "技能特长" },
   { id: 'awards', icon: Medal, title: "获奖经历" },
   { id: 'certificates', icon: Award, title: "证书资质" },
-  { id: 'publications', icon: BookOpen, title: "出版物" },
-  { id: 'languages', icon: Languages, title: "语言能力" },
-  { id: 'interests', icon: Gamepad2, title: "兴趣爱好" },
-  { id: 'references', icon: Users, title: "推荐信" },
-  { id: 'profiles', icon: Share2, title: "社交账号" }
+  { id: 'publications', icon: BookOpen, title: "出版物" }
 ] as const
 
 export function LeftSidebar() {
-  const { resumeData } = useResumeStore()
   const contentRef = useRef<HTMLDivElement>(null)
 
   const scrollToSection = (sectionId: string) => {
@@ -67,27 +63,11 @@ export function LeftSidebar() {
         <div ref={contentRef} className="space-y-8 p-6">
           {/* 基本信息部分 */}
           <section id="profile">
-            <ProfileSection />
+            <ProfileSec />
           </section>
-
-          {/* 教育经历部分 */}
-          <section id="education">
-            <EducationSection />
-          </section>
-
-          {/* 工作经历部分 */}
-          <section id="work">
-            <WorkSection />
-          </section>
-
-          {/* 项目经历部分 */}
-          <section id="projects">
-            <ProjectSection />
-          </section>
-
 
           {/* 其他部分 */}
-          {sections.slice(4).map(({ id, title }) => (
+          {sections.slice(1).map(({ id, title }) => (
             <section key={id} id={id} className="space-y-4">
               <h2 className="text-lg font-semibold">{title}</h2>
               <div className="rounded-lg border bg-card p-4">

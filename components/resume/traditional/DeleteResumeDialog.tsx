@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Resume } from "@/types/resume"
 import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -20,22 +21,24 @@ interface DeleteResumeDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: () => Promise<void>
+  isParentLoading?: boolean
 }
 
 export function DeleteResumeDialog({
   resume,
   open,
   onOpenChange,
-  onSuccess
+  onSuccess,
+  isParentLoading
 }: DeleteResumeDialogProps) {
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleConfirm = async () => {
-    if (!resume) return
+  const handleDelete = async () => {
+    if (!resume || isDeleting || isParentLoading) return
     
     try {
-      setIsProcessing(true)
-      const response = await fetch(`/api/resumes/${resume.id}`, {
+      setIsDeleting(true)
+      const response = await fetch(`/api/resume/${resume.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -54,45 +57,52 @@ export function DeleteResumeDialog({
       console.error('删除简历失败:', err)
       toast.error(err instanceof Error ? err.message : '删除失败')
     } finally {
-      setIsProcessing(false)
+      setIsDeleting(false)
+      onOpenChange(false)
+    }
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    if (!isDeleting) {
+      onOpenChange(open)
     }
   }
 
   return (
-    <AlertDialog open={!!deleteId}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>确认删除</AlertDialogTitle>
-            <AlertDialogDescription>
-              此操作不可撤销，确定要删除吗？
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel 
-              onClick={() => setDeleteId(null)}
-              disabled={isDeleting}
-            >
-              取消
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteId && handleDelete(deleteId)}
-              disabled={isDeleting}
-              className={cn(
-                "bg-destructive hover:bg-destructive/90",
-                isDeleting && "opacity-50 cursor-not-allowed"
-              )}
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  删除中...
-                </>
-              ) : (
-                "确认删除"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>确认删除</AlertDialogTitle>
+          <AlertDialogDescription>
+            确定要删除简历 &quot;{resume?.name}&quot; 吗？此操作不可撤销。
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel 
+            onClick={() => !isDeleting && onOpenChange(false)}
+            disabled={isDeleting}
+          >
+            取消
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className={cn(
+              "bg-destructive hover:bg-destructive/90",
+              isDeleting && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                删除中...
+              </>
+            ) : (
+              "确认删除"
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 } 

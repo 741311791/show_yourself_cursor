@@ -1,21 +1,23 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
 import { Panel, PanelGroup, PanelResizeHandle } from "@/components/ui/panel"
 import { cn } from "@/lib/utils"
 import { useBreakpoint } from "@/hooks/useBreakpoint"
 import { LeftSidebar } from "./sidebars/LeftSidebar"
 import { RightSidebar } from "./sidebars/RightSidebar"
 import { useResumeStore } from "@/store/useResumeStore"
+import { convertToResumeDetail } from "@/services/resume/resumeService"
 import { toast } from "sonner"
+import { WhiteboardPlaceholder } from "./WhiteboardPlaceholder"
 
-interface ResumeBuilderClientProps {
-  id: string
-}
-
-export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
+export function ResumeBuilderClient() {
+  const params = useParams()
+  const resumeId = params.id as string
+  
   const [mounted, setMounted] = useState(false)
-  const { isDesktop } = useBreakpoint()
+  const { } = useBreakpoint()
   const setResumeData = useResumeStore(state => state.setResumeData)
 
   // 侧边栏拖拽状态
@@ -30,31 +32,24 @@ export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
   useEffect(() => {
     const fetchResume = async () => {
       try {
-        const response = await fetch(`/api/resumes/${id}`)
+        const response = await fetch(`/api/resume/${resumeId}`)
         if (!response.ok) {
           throw new Error('获取简历失败')
         }
         const data = await response.json()
-        setResumeData(data)
+        const resumeDetail = convertToResumeDetail(data)
+        console.log('🚀 获取简历:', resumeDetail)
+        setResumeData(resumeDetail)
       } catch (error) {
         console.error('获取简历失败:', error)
         toast.error('获取简历失败，请刷新重试')
       }
     }
 
-    fetchResume()
-  }, [id, setResumeData])
-
-  function WhiteboardPlaceholder() {
-    return (
-      <div className="h-full w-full flex items-center justify-center bg-white rounded-lg shadow-sm">
-        <div className="text-center space-y-2">
-          <h3 className="text-xl font-semibold text-gray-800">白板页面</h3>
-          <p className="text-sm text-gray-500">该功能正在开发中...</p>
-        </div>
-      </div>
-    )
-  }
+    if (resumeId) {
+      fetchResume()
+    }
+  }, [resumeId, setResumeData])
 
   if (!mounted) {
     return null
@@ -81,7 +76,7 @@ export function ResumeBuilderClient({ id }: ResumeBuilderClientProps) {
         />
 
         <Panel>
-          <div className="flex-1 overflow-auto bg-muted/30 p-6">
+          <div className="h-full overflow-y-auto bg-muted/30 p-6">
             <WhiteboardPlaceholder />
           </div>
         </Panel>
