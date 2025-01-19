@@ -1,13 +1,16 @@
 "use client"
 
 import { useRef } from "react"
+import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 import { ProfileSec } from "@/components/resume/sections/ProfileSec"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
   User, Medal, Briefcase,
   GraduationCap, Award, Gamepad2, Languages,
-  Puzzle, BookOpen, Wrench, ScrollText, UserRound
+  Puzzle, BookOpen, Wrench, ScrollText, UserRound,
+  Sun, Moon, Home
 } from "lucide-react"
 
 // 定义部分配置
@@ -28,6 +31,8 @@ const sections = [
 ] as const
 
 export function LeftSidebar() {
+  const router = useRouter()
+  const { theme, setTheme } = useTheme()
   const contentRef = useRef<HTMLDivElement>(null)
 
   const scrollToSection = (sectionId: string) => {
@@ -43,19 +48,49 @@ export function LeftSidebar() {
   return (
     <div className="flex h-full">
       {/* 左侧图标导航栏 */}
-      <div className="flex w-12 flex-col items-center gap-1 bg-muted/30 py-4">
-        {sections.map(({ id, icon: Icon, title }) => (
+      <div className="flex w-12 flex-col bg-muted/30 py-4">
+        {/* 主要导航按钮 */}
+        <div className="flex-1 flex flex-col items-center gap-1">
+          {sections.map(({ id, icon: Icon, title }) => (
+            <Button
+              key={id}
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8 rounded-lg"
+              title={title}
+              onClick={() => scrollToSection(id)}
+            >
+              <Icon className="h-4 w-4" />
+            </Button>
+          ))}
+        </div>
+
+        {/* 底部功能按钮 */}
+        <div className="flex flex-col items-center gap-2 pt-4 border-t border-border/50">
           <Button
-            key={id}
             size="icon"
             variant="ghost"
             className="h-8 w-8 rounded-lg"
-            title={title}
-            onClick={() => scrollToSection(id)}
+            title={theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式'}
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           >
-            <Icon className="h-4 w-4" />
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
           </Button>
-        ))}
+
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 rounded-lg"
+            title="返回主页"
+            onClick={() => router.push('/resume/traditional')}
+          >
+            <Home className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* 右侧内容区域 */}

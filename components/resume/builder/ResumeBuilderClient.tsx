@@ -11,6 +11,7 @@ import { useResumeStore } from "@/store/useResumeStore"
 import { convertToResumeDetail } from "@/services/resume/resumeService"
 import { toast } from "sonner"
 import { WhiteboardPlaceholder } from "./WhiteboardPlaceholder"
+import { AutoSaver } from "@/components/resume/shared/AutoSaver"
 
 export function ResumeBuilderClient() {
   const params = useParams()
@@ -57,6 +58,8 @@ export function ResumeBuilderClient() {
 
   return (
     <div className="relative h-screen overflow-hidden">
+      <AutoSaver resumeId={resumeId} interval={30000} />
+
       <PanelGroup direction="horizontal">
         <Panel
           minSize={25}

@@ -35,7 +35,6 @@ const iconList = Object.entries(icons).map(([name]) => ({
 }))
 
 export function CustomFieldsSection({
-  title = "自定义字段",
   fields = [],
   onChange,
   className
@@ -76,18 +75,15 @@ export function CustomFieldsSection({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <div className="flex items-center justify-between">
-        <Label>{title}</Label>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          onClick={addField}
-          className="h-8 w-8 rounded-full hover:bg-background/80"
-        >
-          <Plus className="h-4 w-4 text-muted-foreground" />
-        </Button>
-      </div>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={addField}
+        className="w-full h-9 border-dashed hover:border-solid flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <Plus className="h-4 w-4" />
+        <span className="text-sm">添加自定义字段</span>
+      </Button>
 
       {fields.map(field => {
         const IconComponent = icons[field.icon as keyof typeof icons] || FileText
@@ -162,19 +158,13 @@ export function CustomFieldsSection({
               variant="ghost"
               size="icon"
               onClick={() => removeField(field.id)}
-              className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-9 w-9"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         )
       })}
-
-      {fields.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          <p>点击上方按钮添加自定义字段</p>
-        </div>
-      )}
     </div>
   )
 } 

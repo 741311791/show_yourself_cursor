@@ -6,8 +6,8 @@ import { useDebounce } from "@/hooks/useDebounce"
 import { ProfileSection, defaultProfileSection } from "@/types/section"
 import { Switch } from "@/components/ui/switch"
 import { EditableLabel } from "@/components/resume/shared/EditableLabel"
-import { AvatarUpload } from "@/components/shared/AvatarUpload"
-import { CustomFieldsSection } from "@/components/resume/shared/CustomFieldsSection"
+import { ProfileCard } from "@/components/resume/cards/ProfileCard"
+import { LoadFromTimelineButton } from "@/components/resume/shared/LoadFromTimeline"
 
 export function ProfileSec() {
   // 从全局状态获取 profile 数据
@@ -17,7 +17,7 @@ export function ProfileSec() {
   // 初始化本地状态
   useEffect(() => {
     setLocalProfileSection(profileData || defaultProfileSection)
-  }, [])
+  }, [profileData])
 
   // 防抖更新全局状态
   const updateGlobalSection = useCallback((section: ProfileSection) => {
@@ -40,8 +40,26 @@ export function ProfileSec() {
     })
   }, [])
 
+  // 处理从个人履历加载的数据
+  const handleProfileDataLoaded = useCallback((profileData: any) => {
+    setLocalProfileSection(prev => ({
+      ...prev,
+      name: profileData.name || prev.name,
+      avatar: profileData.avatar || prev.avatar,
+      gender: profileData.gender || prev.gender,
+      title: profileData.title || prev.title,
+      email: profileData.email || prev.email,
+      phone: profileData.phone || prev.phone,
+      location: profileData.location || prev.location,
+      website: profileData.website || prev.website,
+      birthday: profileData.birthday || prev.birthday,
+      summary: profileData.summary || prev.summary,
+      customFields: profileData.customFields || prev.customFields,
+    }))
+  }, [])
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* 标题和显示控制 */}
       <div className="flex items-center justify-between">
         <EditableLabel
@@ -64,21 +82,17 @@ export function ProfileSec() {
               {localProfileSection.sectionConfig.isShow ? '显示' : '隐藏'}
             </span>
           </div>
+          <LoadFromTimelineButton
+            sectionType="profile"
+            onDataLoaded={handleProfileDataLoaded}
+          />
         </div>
       </div>
 
-      {/* 头像上传 */}
-      <div className="space-y-2">
-        <AvatarUpload
-          value={localProfileSection.avatar}
-          onChange={(url) => handleUpdate({avatar: url})}
-        />
-      </div>
-
-      {/* 自定义字段 */}
-      <CustomFieldsSection
-        fields={localProfileSection.customFields}
-        onChange={(fields) => handleUpdate({ customFields: fields })}
+      {/* Profile 卡片 */}
+      <ProfileCard
+        section={localProfileSection}
+        onUpdate={handleUpdate}
       />
     </div>
   )
