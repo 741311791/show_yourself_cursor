@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import { ProfileSec } from "@/components/resume/sections/ProfileSec"
 import { Button } from "@/components/ui/button"
+import { EducationSec } from "@/components/resume/sections/EducationSec"
+import { WorkSec } from "@/components/resume/sections/WorkSec"
+import { ProjectSec } from "@/components/resume/sections/ProjectSec"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
   User, Medal, Briefcase,
@@ -17,9 +20,9 @@ import {
 const sections = [
   { id: 'profile', icon: User, title: "基本信息" },
   { id: 'education', icon: GraduationCap, title: "教育经历" },
-  { id: 'student', icon: UserRound, title: "学生经历" },
   { id: 'work', icon: Briefcase, title: "工作经历" },
   { id: 'projects', icon: Puzzle, title: "项目经历" },
+  { id: 'student', icon: UserRound, title: "学生经历" },
   { id: 'research', icon: BookOpen, title: "研究经历" },
   { id: 'researchResult', icon: ScrollText, title: "研究成果" },
   { id: 'languages', icon: Languages, title: "语言能力" },
@@ -101,8 +104,21 @@ export function LeftSidebar() {
             <ProfileSec />
           </section>
 
+          {/* 教育经历部分 */}
+          <section id="education">
+            <EducationSec />
+          </section>
+
+          <section id="work">
+            <WorkSec />
+          </section>
+
+          <section id="projects">
+            <ProjectSec />
+          </section>
+
           {/* 其他部分 */}
-          {sections.slice(1).map(({ id, title }) => (
+          {sections.slice(4).map(({ id, title }) => (
             <section key={id} id={id} className="space-y-4">
               <h2 className="text-lg font-semibold">{title}</h2>
               <div className="rounded-lg border bg-card p-4">

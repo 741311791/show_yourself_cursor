@@ -44,67 +44,80 @@ export interface ProfileSection extends Profile {
     sectionConfig: SectionConfig
 }
 
-export interface EducationSection extends Education {
+export interface EducationSection {
+    items: Education[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface WorkSection extends Work {
+export interface WorkSection {
+    items: Work[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface ProjectSection extends Project {
+export interface ProjectSection {
+    items: Project[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface ResearchSection extends Research {
+export interface ResearchSection {
+    items: Research[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface HobbySection extends Hobby {
+export interface HobbySection {
+    items: Hobby[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface LanguageSection extends Language {
+export interface LanguageSection {
+    items: Language[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface SkillSection extends Skill {
+export interface SkillSection {
+    items: Skill[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface AwardSection extends Award {
+export interface AwardSection {
+    items: Award[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface CertificateSection extends Certificate {
+export interface CertificateSection {
+    items: Certificate[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface PublicationSection extends Publication {
+export interface PublicationSection {
+    items: Publication[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface CustomBlockSection extends CustomBlockForm {
+export interface CustomBlockSection {
+    items: CustomBlockForm[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface StudentSection extends Student {
+export interface StudentSection {
+    items: Student[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
 
-export interface ResearchResultSection extends ResearchResult {
+export interface ResearchResultSection {
+    items: ResearchResult[]
     labelConfig: LabelConfig[]
     sectionConfig: SectionConfig
 }
@@ -159,7 +172,7 @@ export const defaultProfileSection: ProfileSection = {
 }
 
 export const defaultEducationSection: EducationSection = {
-    ...defaultEducation,
+    items: [defaultEducation],
     labelConfig: [
         { key: "school", label: "学校", icon: "GraduationCap" },
         { key: "major", label: "专业", icon: "BookOpen" },
@@ -180,7 +193,7 @@ export const defaultEducationSection: EducationSection = {
 }
 
 export const defaultWorkSection: WorkSection = {
-    ...defaultWork,
+    items: [defaultWork],
     labelConfig: [
         { key: "company", label: "公司", icon: "Building2" },
         { key: "position", label: "职位", icon: "Briefcase" },
@@ -198,7 +211,7 @@ export const defaultWorkSection: WorkSection = {
 }
 
 export const defaultProjectSection: ProjectSection = {
-    ...defaultProject,
+    items: [defaultProject],
     labelConfig: [
         { key: "name", label: "项目名称", icon: "Folder" },
         { key: "company", label: "公司", icon: "Building2" },
@@ -218,7 +231,7 @@ export const defaultProjectSection: ProjectSection = {
 }
 
 export const defaultHobbySection: HobbySection = {
-    ...defaultHobby,
+    items: [defaultHobby],
     labelConfig: [
         { key: "name", label: "名称", icon: "Folder" },
         { key: "startDate", label: "开始时间", icon: "CalendarRange" },
@@ -233,7 +246,7 @@ export const defaultHobbySection: HobbySection = {
 }
 
 export const defaultLanguageSection: LanguageSection = {
-    ...defaultLanguage,
+    items: [defaultLanguage],
     labelConfig: [
         { key: "name", label: "名称", icon: "Languages" },
         { key: "level", label: "水平", icon: "BarChart" },
@@ -252,7 +265,7 @@ export const defaultLanguageSection: LanguageSection = {
 }
 
 export const defaultSkillSection: SkillSection = {
-    ...defaultSkill,
+    items: [defaultSkill],
     labelConfig: [
         { key: "name", label: "名称", icon: "Folder" },
         { key: "category", label: "类别", icon: "Tag" },
@@ -271,7 +284,7 @@ export const defaultSkillSection: SkillSection = {
 }
 
 export const defaultAwardSection: AwardSection = {
-    ...defaultAward,
+    items: [defaultAward],
     labelConfig: [
         { key: "name", label: "名称", icon: "Award" },
         { key: "issuer", label: "颁发机构", icon: "Building" },
@@ -287,7 +300,7 @@ export const defaultAwardSection: AwardSection = {
 }
 
 export const defaultCertificateSection: CertificateSection = {
-    ...defaultCertificate,
+    items: [defaultCertificate],
     labelConfig: [
         { key: "name", label: "名称", icon: "Certificate" },
         { key: "issuer", label: "颁发机构", icon: "Building" },
@@ -304,7 +317,7 @@ export const defaultCertificateSection: CertificateSection = {
 }
 
 export const defaultPublicationSection: PublicationSection = {
-    ...defaultPublication,
+    items: [defaultPublication],
     labelConfig: [
         { key: "name", label: "名称", icon: "BookOpen" },
         { key: "type", label: "类型", icon: "Tag" },
@@ -322,7 +335,7 @@ export const defaultPublicationSection: PublicationSection = {
 }
 
 export const defaultResearchSection: ResearchSection = {
-    ...defaultResearch,
+    items: [defaultResearch],
     labelConfig: [
         { key: "direction", label: "研究方向", icon: "BookOpen" },
         { key: "institution", label: "研究机构", icon: "Building" },
@@ -340,7 +353,7 @@ export const defaultResearchSection: ResearchSection = {
 }
 
 export const defaultStudentSection: StudentSection = {
-    ...defaultStudent,
+    items: [defaultStudent],
     labelConfig: [
         { key: "activityName", label: "活动/项目名称", icon: "Folder" },
         { key: "organization", label: "组织/社团名称", icon: "Building" },
@@ -358,7 +371,7 @@ export const defaultStudentSection: StudentSection = {
 }
 
 export const defaultResearchResultSection: ResearchResultSection = {
-    ...defaultResearchResult,
+    items: [defaultResearchResult],
     labelConfig: [
         { key: "name", label: "名称", icon: "Folder" },
         { key: "type", label: "类型", icon: "Tag" },
@@ -375,7 +388,7 @@ export const defaultResearchResultSection: ResearchResultSection = {
 }
 
 export const defaultCustomBlockSection: CustomBlockSection = {
-    ...defaultCustomBlockForm,
+    items: [defaultCustomBlockForm],
     labelConfig: [],
     sectionConfig: {
         title: "自定义块",

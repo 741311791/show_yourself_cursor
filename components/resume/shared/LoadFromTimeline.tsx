@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useSession } from "next-auth/react"
 
-interface LoadFromTimelineButtonProps {
-  sectionType: 'profile' | 'education' | 'work' | 'project' | 'award' | 'certificate' | 'hobby' | 'skill' | 'language' | 'research' | 'research-result' | 'student' // 可以根据需要扩展
-  onDataLoaded: (data: any) => void
+interface LoadFromTimelineButtonProps<T> {
+  sectionType: 'profile' | 'education' | 'work' | 'project' | 'award' | 'certificate' | 'hobby' | 'skill' | 'language' | 'research' | 'research-result' | 'student'
+  onDataLoaded: (data: T) => void
 }
 
-export function LoadFromTimelineButton({ sectionType, onDataLoaded }: LoadFromTimelineButtonProps) {
+export function LoadFromTimelineButton<T>({ 
+  sectionType, 
+  onDataLoaded 
+}: LoadFromTimelineButtonProps<T>) {
   const { data: session } = useSession()
   const [isLoading, setIsLoading] = useState(false)
 

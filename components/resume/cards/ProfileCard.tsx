@@ -4,38 +4,12 @@ import { ProfileSection } from "@/types/section"
 import { AvatarUpload } from "@/components/shared/AvatarUpload"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { CustomFieldsSection } from "@/components/resume/shared/CustomFieldsSection"
-import { Input } from "@/components/ui/input"
-import { User, Briefcase, Mail, Phone, MapPin, Globe, Calendar, GraduationCap, Building, Users } from "lucide-react"
+import { LabelInput } from "@/components/resume/shared/LabelInput"
+import { User, Briefcase, Mail, Phone, MapPin, Globe, Calendar } from "lucide-react"
 
 interface ProfileCardProps {
   section: ProfileSection
   onUpdate: (updates: Partial<ProfileSection>) => void
-}
-
-interface LabelInputProps {
-  label: string
-  value: string
-  icon: React.ReactNode
-  onChange: (value: string) => void
-  type?: string
-  placeholder?: string
-}
-
-function LabelInput({ label, value, icon, onChange, type = "text", placeholder }: LabelInputProps) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <div className="text-gray-400">{icon}</div>
-        <label className="text-sm font-medium text-gray-700">{label}</label>
-      </div>
-      <Input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        type={type}
-        placeholder={placeholder}
-      />
-    </div>
-  )
 }
 
 interface SectionTitleProps {

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useResumeStore } from "@/store/useResumeStore"
 import { useDebounce } from "@/hooks/useDebounce"
 import { ProfileSection, defaultProfileSection } from "@/types/section"
+import { Profile } from "@/types/profile"
 import { Switch } from "@/components/ui/switch"
 import { EditableLabel } from "@/components/resume/shared/EditableLabel"
 import { ProfileCard } from "@/components/resume/cards/ProfileCard"
@@ -41,7 +42,7 @@ export function ProfileSec() {
   }, [])
 
   // 处理从个人履历加载的数据
-  const handleProfileDataLoaded = useCallback((profileData: any) => {
+  const handleProfileDataLoaded = useCallback((profileData: Profile) => {
     setLocalProfileSection(prev => ({
       ...prev,
       name: profileData.name || prev.name,
@@ -82,7 +83,7 @@ export function ProfileSec() {
               {localProfileSection.sectionConfig.isShow ? '显示' : '隐藏'}
             </span>
           </div>
-          <LoadFromTimelineButton
+          <LoadFromTimelineButton<Profile>
             sectionType="profile"
             onDataLoaded={handleProfileDataLoaded}
           />
