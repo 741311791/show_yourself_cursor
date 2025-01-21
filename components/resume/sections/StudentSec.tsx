@@ -41,11 +41,14 @@ export function StudentSec() {
       ...prev,
       items: studentData.map((student: Student) => ({
         id: uuidv4(),
+        activityType: student.activityType || 'OTHER',
+        activityName: student.activityName || '',
         organization: student.organization || '',
         role: student.role || '',
         startDate: student.startDate || '',
         endDate: student.endDate || '',
-        location: student.location || '',
+        description: student.description || '',
+        achievement: student.achievement || '',
         summary: student.summary || '',
         customFields: student.customFields || []
       }))

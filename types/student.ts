@@ -4,7 +4,6 @@ export type ActivityType = 'CLUB' | 'COMPETITION' | 'VOLUNTEER' | 'OTHER'
 
 export interface Student {
   id?: string
-  userId: string
   educationId?: string
   activityType?: ActivityType
   activityName: string           // 活动/项目名称
@@ -20,7 +19,6 @@ export interface Student {
 } 
 
 export const defaultStudent: Student = {
-  userId: '',
   activityName: '',
   activityType: 'OTHER',
   organization: '',

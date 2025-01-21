@@ -1,17 +1,17 @@
 "use client"
 
-import { StudentSection } from "@/types/section"
-import { Student, defaultStudent } from "@/types/student"
+import { AwardSection } from "@/types/section"
+import { Award, defaultAward } from "@/types/award"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { CustomFieldsSection } from "@/components/resume/shared/CustomFieldsSection"
 import { LabelInput } from "@/components/resume/shared/LabelInput"
 import { DraggableCardList } from "@/components/resume/shared/DraggableCardList"
 import { v4 as uuidv4 } from 'uuid'
-import { Users, Calendar, Building2, MapPin, User2 } from "lucide-react"
+import { Medal, Trophy, Calendar, Building2, Award as AwardIcon } from "lucide-react"
 
-interface StudentCardProps {
-  section: StudentSection
-  onUpdate: (updates: Partial<StudentSection>) => void
+interface AwardCardProps {
+  section: AwardSection
+  onUpdate: (updates: Partial<AwardSection>) => void
 }
 
 interface SectionTitleProps {
@@ -27,110 +27,108 @@ function SectionTitle({ children }: SectionTitleProps) {
   )
 }
 
-export function StudentCard({ section, onUpdate }: StudentCardProps) {
-  const handleAddStudent = () => {
+export function AwardCard({ section, onUpdate }: AwardCardProps) {
+  const handleAddAward = () => {
     onUpdate({
       items: [
         ...section.items,
         {
-          ...defaultStudent,
+          ...defaultAward,
           id: uuidv4()
         }
       ]
     })
   }
 
-  const renderCollapsedContent = (item: Student) => (
+  const renderCollapsedContent = (item: Award) => (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2">
-        <Users className="h-4 w-4 text-rose-500" />
+        <Medal className="h-4 w-4 text-rose-500" />
         <span className="text-sm">
-          {item.organization || ''}
+          {item.name || ''}
         </span>
       </div>
 
       <div className="flex items-center gap-2">
-        <Calendar className="h-4 w-4 text-rose-500" />
+        <Trophy className="h-4 w-4 text-rose-500" />
         <span className="text-sm text-muted-foreground">
-          {item.startDate && item.endDate 
-            ? `${item.startDate} - ${item.endDate}`
-            : item.startDate || item.endDate || ''
-          }
+          {[item.level, item.ranking].filter(Boolean).join(' · ') || ''}
         </span>
       </div>
 
       <div className="flex items-center gap-2">
-        <User2 className="h-4 w-4 text-rose-500" />
+        <Building2 className="h-4 w-4 text-rose-500" />
         <span className="text-sm text-muted-foreground">
-          {item.role || ''}
+          {item.issuer || ''}
         </span>
       </div>
     </div>
   )
 
-  const renderExpandedContent = (item: Student) => (
+  const renderExpandedContent = (item: Award) => (
     <div className="space-y-6">
       <SectionTitle>基本信息</SectionTitle>
       <div className="grid grid-cols-2 gap-4">
         <LabelInput
-          label={section.labelConfig.find(label => label.key === 'organization')?.label ?? '组织名称'}
-          value={item.organization || ''}
+          label={section.labelConfig.find(label => label.key === 'name')?.label ?? '奖项名称'}
+          value={item.name || ''}
+          icon={<Medal className="h-4 w-4" />}
+          onChange={(value) => {
+            const newItems = section.items.map(i => 
+              i.id === item.id ? { ...i, name: value } : i
+            )
+            onUpdate({ items: newItems })
+          }}
+          placeholder="请输入奖项名称"
+        />
+        <LabelInput
+          label={section.labelConfig.find(label => label.key === 'level')?.label ?? '奖项级别'}
+          value={item.level || ''}
+          icon={<Trophy className="h-4 w-4" />}
+          onChange={(value) => {
+            const newItems = section.items.map(i => 
+              i.id === item.id ? { ...i, level: value } : i
+            )
+            onUpdate({ items: newItems })
+          }}
+          placeholder="请输入奖项级别"
+        />
+        <LabelInput
+          label={section.labelConfig.find(label => label.key === 'issuer')?.label ?? '颁发机构'}
+          value={item.issuer || ''}
           icon={<Building2 className="h-4 w-4" />}
           onChange={(value) => {
             const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, organization: value } : i
+              i.id === item.id ? { ...i, issuer: value } : i
             )
             onUpdate({ items: newItems })
           }}
-          placeholder="请输入组织名称"
+          placeholder="请输入颁发机构"
         />
         <LabelInput
-          label={section.labelConfig.find(label => label.key === 'role')?.label ?? '担任职务'}
-          value={item.role || ''}
-          icon={<User2 className="h-4 w-4" />}
-          onChange={(value) => {
-            const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, role: value } : i
-            )
-            onUpdate({ items: newItems })
-          }}
-          placeholder="请输入担任职务"
-        />
-        <LabelInput
-          label={section.labelConfig.find(label => label.key === 'activityName')?.label ?? '活动/项目名称'}
-          value={item.activityName || ''}
-          icon={<MapPin className="h-4 w-4" />}
-          onChange={(value) => {
-            const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, activityName: value } : i
-            )
-            onUpdate({ items: newItems })
-          }}
-          placeholder="请输入活动/项目名称"
-        />
-        <LabelInput
-          label={section.labelConfig.find(label => label.key === 'startDate')?.label ?? '开始日期'}
-          value={item.startDate || ''}
+          label={section.labelConfig.find(label => label.key === 'acquireDate')?.label ?? '获奖日期'}
+          value={item.acquireDate || ''}
           icon={<Calendar className="h-4 w-4" />}
           onChange={(value) => {
             const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, startDate: value } : i
+              i.id === item.id ? { ...i, acquireDate: value } : i
             )
             onUpdate({ items: newItems })
           }}
           type="date"
+          placeholder="请输入获奖日期"
         />
         <LabelInput
-          label={section.labelConfig.find(label => label.key === 'endDate')?.label ?? '结束日期'}
-          value={item.endDate || ''}
-          icon={<Calendar className="h-4 w-4" />}
+          label={section.labelConfig.find(label => label.key === 'ranking')?.label ?? '获奖等级'}
+          value={item.ranking || ''}
+          icon={<AwardIcon className="h-4 w-4" />}
           onChange={(value) => {
             const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, endDate: value } : i
+              i.id === item.id ? { ...i, ranking: value } : i
             )
             onUpdate({ items: newItems })
           }}
-          type="date"
+          placeholder="请输入获奖排名"
         />
       </div>
 
@@ -148,7 +146,7 @@ export function StudentCard({ section, onUpdate }: StudentCardProps) {
       </div>
 
       <div className="space-y-4">
-        <SectionTitle>经历描述</SectionTitle>
+        <SectionTitle>获奖总结</SectionTitle>
         <AIRichTextEditor
           content={item.summary || ""}
           onChange={(content) => {
@@ -168,10 +166,10 @@ export function StudentCard({ section, onUpdate }: StudentCardProps) {
       <DraggableCardList
         items={section.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() }))}
         onChange={(items) => onUpdate({ items })}
-        onAddItem={handleAddStudent}
+        onAddItem={handleAddAward}
         renderCollapsedContent={renderCollapsedContent}
         renderExpandedContent={renderExpandedContent}
-        addButtonText="添加学生经历"
+        addButtonText="添加获奖经历"
       />
     </div>
   )

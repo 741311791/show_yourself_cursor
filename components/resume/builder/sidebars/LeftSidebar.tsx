@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button"
 import { EducationSec } from "@/components/resume/sections/EducationSec"
 import { WorkSec } from "@/components/resume/sections/WorkSec"
 import { ProjectSec } from "@/components/resume/sections/ProjectSec"
+import { StudentSec } from "@/components/resume/sections/StudentSec"
+import { LanguageSec } from "@/components/resume/sections/LanguageSec"
+import { SkillSec } from "@/components/resume/sections/SkillSec"
+import { AwardSec } from "@/components/resume/sections/AwardSec"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
   User, Medal, Briefcase,
@@ -23,12 +27,12 @@ const sections = [
   { id: 'work', icon: Briefcase, title: "工作经历" },
   { id: 'projects', icon: Puzzle, title: "项目经历" },
   { id: 'student', icon: UserRound, title: "学生经历" },
-  { id: 'research', icon: BookOpen, title: "研究经历" },
-  { id: 'researchResult', icon: ScrollText, title: "研究成果" },
   { id: 'languages', icon: Languages, title: "语言能力" },
-  { id: 'interests', icon: Gamepad2, title: "兴趣爱好" },
   { id: 'skills', icon: Wrench, title: "技能特长" },
   { id: 'awards', icon: Medal, title: "获奖经历" },
+  { id: 'research', icon: BookOpen, title: "研究经历" },
+  { id: 'researchResult', icon: ScrollText, title: "研究成果" },
+  { id: 'interests', icon: Gamepad2, title: "兴趣爱好" },
   { id: 'certificates', icon: Award, title: "证书资质" },
   { id: 'publications', icon: BookOpen, title: "出版物" }
 ] as const
@@ -117,8 +121,24 @@ export function LeftSidebar() {
             <ProjectSec />
           </section>
 
+          <section id="student">
+            <StudentSec />
+          </section>
+
+          <section id="languages">
+            <LanguageSec />
+          </section>
+
+          <section id="skills">
+            <SkillSec />
+          </section>
+
+          <section id="awards">
+            <AwardSec />
+          </section>
+
           {/* 其他部分 */}
-          {sections.slice(4).map(({ id, title }) => (
+          {sections.slice(8).map(({ id, title }) => (
             <section key={id} id={id} className="space-y-4">
               <h2 className="text-lg font-semibold">{title}</h2>
               <div className="rounded-lg border bg-card p-4">

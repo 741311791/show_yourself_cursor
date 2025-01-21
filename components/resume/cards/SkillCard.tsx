@@ -1,17 +1,18 @@
 "use client"
 
-import { StudentSection } from "@/types/section"
-import { Student, defaultStudent } from "@/types/student"
+import { SkillSection } from "@/types/section"
+import { Skill, defaultSkill } from "@/types/skill"
 import { AIRichTextEditor } from "@/components/shared/AIRichTextEditor"
 import { CustomFieldsSection } from "@/components/resume/shared/CustomFieldsSection"
 import { LabelInput } from "@/components/resume/shared/LabelInput"
 import { DraggableCardList } from "@/components/resume/shared/DraggableCardList"
+import { SkillCategory, SkillLevel } from "@/types/skill"
 import { v4 as uuidv4 } from 'uuid'
-import { Users, Calendar, Building2, MapPin, User2 } from "lucide-react"
+import { Code, Star, Folder, Gauge, Calendar, FileText, Building2 } from "lucide-react"
 
-interface StudentCardProps {
-  section: StudentSection
-  onUpdate: (updates: Partial<StudentSection>) => void
+interface SkillCardProps {
+  section: SkillSection
+  onUpdate: (updates: Partial<SkillSection>) => void
 }
 
 interface SectionTitleProps {
@@ -27,110 +28,119 @@ function SectionTitle({ children }: SectionTitleProps) {
   )
 }
 
-export function StudentCard({ section, onUpdate }: StudentCardProps) {
-  const handleAddStudent = () => {
+export function SkillCard({ section, onUpdate }: SkillCardProps) {
+  const handleAddSkill = () => {
     onUpdate({
       items: [
         ...section.items,
         {
-          ...defaultStudent,
+          ...defaultSkill,
           id: uuidv4()
         }
       ]
     })
   }
 
-  const renderCollapsedContent = (item: Student) => (
+  const renderCollapsedContent = (item: Skill) => (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2">
-        <Users className="h-4 w-4 text-rose-500" />
+        <Code className="h-4 w-4 text-rose-500" />
         <span className="text-sm">
-          {item.organization || ''}
+          {item.name || ''}
         </span>
       </div>
 
       <div className="flex items-center gap-2">
-        <Calendar className="h-4 w-4 text-rose-500" />
+        <Star className="h-4 w-4 text-rose-500" />
         <span className="text-sm text-muted-foreground">
-          {item.startDate && item.endDate 
-            ? `${item.startDate} - ${item.endDate}`
-            : item.startDate || item.endDate || ''
-          }
+          {item.level || ''}
         </span>
       </div>
 
       <div className="flex items-center gap-2">
-        <User2 className="h-4 w-4 text-rose-500" />
+        <Folder className="h-4 w-4 text-rose-500" />
         <span className="text-sm text-muted-foreground">
-          {item.role || ''}
+          {item.category || ''}
         </span>
       </div>
     </div>
   )
 
-  const renderExpandedContent = (item: Student) => (
+  const renderExpandedContent = (item: Skill) => (
     <div className="space-y-6">
       <SectionTitle>基本信息</SectionTitle>
       <div className="grid grid-cols-2 gap-4">
         <LabelInput
-          label={section.labelConfig.find(label => label.key === 'organization')?.label ?? '组织名称'}
-          value={item.organization || ''}
+          label={section.labelConfig.find(label => label.key === 'name')?.label ?? '技能名称'}
+          value={item.name || ''}
+          icon={<Code className="h-4 w-4" />}
+          onChange={(value) => {
+            const newItems = section.items.map(i => 
+              i.id === item.id ? { ...i, name: value } : i
+            )
+            onUpdate({ items: newItems })
+          }}
+          placeholder="请输入技能名称"
+        />
+        <LabelInput
+          label={section.labelConfig.find(label => label.key === 'category')?.label ?? '技能分类'}
+          value={item.category || ''}
+          icon={<Folder className="h-4 w-4" />}
+          onChange={(value) => {
+            const newItems = section.items.map(i => 
+              i.id === item.id ? { ...i, category: value as SkillCategory } : i
+            )
+            onUpdate({ items: newItems })
+          }}
+          placeholder="请输入技能分类"
+        />
+        <LabelInput
+          label={section.labelConfig.find(label => label.key === 'level')?.label ?? '掌握程度'}
+          value={item.level || 'BEGINNER'}
+          icon={<Gauge className="h-4 w-4" />}
+          onChange={(value) => {
+            const newItems = section.items.map(i => 
+              i.id === item.id ? { ...i, level: value as SkillLevel } : i
+            )
+            onUpdate({ items: newItems })
+          }}
+          placeholder="请输入掌握程度"
+        />
+        <LabelInput
+          label={section.labelConfig.find(label => label.key === 'certDate')?.label ?? '证书日期'}
+          value={item.certDate || ''}
+          icon={<Calendar className="h-4 w-4" />}
+          onChange={(value) => {
+            const newItems = section.items.map(i => 
+              i.id === item.id ? { ...i, certDate: value } : i
+            )
+            onUpdate({ items: newItems })
+          }}
+          placeholder="请输入证书日期"
+        />
+        <LabelInput
+          label={section.labelConfig.find(label => label.key === 'certName')?.label ?? '证书名称'}
+          value={item.certName || ''}
+          icon={<FileText className="h-4 w-4" />}
+          onChange={(value) => {
+            const newItems = section.items.map(i => 
+              i.id === item.id ? { ...i, certName: value } : i
+            )
+            onUpdate({ items: newItems })
+          }}
+          placeholder="请输入证书名称"
+        />
+        <LabelInput
+          label={section.labelConfig.find(label => label.key === 'certOrg')?.label ?? '证书颁发机构'}
+          value={item.certOrg || ''}
           icon={<Building2 className="h-4 w-4" />}
           onChange={(value) => {
             const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, organization: value } : i
+              i.id === item.id ? { ...i, certOrg: value } : i
             )
             onUpdate({ items: newItems })
           }}
-          placeholder="请输入组织名称"
-        />
-        <LabelInput
-          label={section.labelConfig.find(label => label.key === 'role')?.label ?? '担任职务'}
-          value={item.role || ''}
-          icon={<User2 className="h-4 w-4" />}
-          onChange={(value) => {
-            const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, role: value } : i
-            )
-            onUpdate({ items: newItems })
-          }}
-          placeholder="请输入担任职务"
-        />
-        <LabelInput
-          label={section.labelConfig.find(label => label.key === 'activityName')?.label ?? '活动/项目名称'}
-          value={item.activityName || ''}
-          icon={<MapPin className="h-4 w-4" />}
-          onChange={(value) => {
-            const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, activityName: value } : i
-            )
-            onUpdate({ items: newItems })
-          }}
-          placeholder="请输入活动/项目名称"
-        />
-        <LabelInput
-          label={section.labelConfig.find(label => label.key === 'startDate')?.label ?? '开始日期'}
-          value={item.startDate || ''}
-          icon={<Calendar className="h-4 w-4" />}
-          onChange={(value) => {
-            const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, startDate: value } : i
-            )
-            onUpdate({ items: newItems })
-          }}
-          type="date"
-        />
-        <LabelInput
-          label={section.labelConfig.find(label => label.key === 'endDate')?.label ?? '结束日期'}
-          value={item.endDate || ''}
-          icon={<Calendar className="h-4 w-4" />}
-          onChange={(value) => {
-            const newItems = section.items.map(i => 
-              i.id === item.id ? { ...i, endDate: value } : i
-            )
-            onUpdate({ items: newItems })
-          }}
-          type="date"
+          placeholder="请输入证书颁发机构"
         />
       </div>
 
@@ -148,7 +158,7 @@ export function StudentCard({ section, onUpdate }: StudentCardProps) {
       </div>
 
       <div className="space-y-4">
-        <SectionTitle>经历描述</SectionTitle>
+        <SectionTitle>总结</SectionTitle>
         <AIRichTextEditor
           content={item.summary || ""}
           onChange={(content) => {
@@ -160,6 +170,8 @@ export function StudentCard({ section, onUpdate }: StudentCardProps) {
           className="min-h-[200px]"
         />
       </div>
+
+      
     </div>
   )
 
@@ -168,10 +180,10 @@ export function StudentCard({ section, onUpdate }: StudentCardProps) {
       <DraggableCardList
         items={section.items.map(item => ({ ...item, id: item.id || crypto.randomUUID() }))}
         onChange={(items) => onUpdate({ items })}
-        onAddItem={handleAddStudent}
+        onAddItem={handleAddSkill}
         renderCollapsedContent={renderCollapsedContent}
         renderExpandedContent={renderExpandedContent}
-        addButtonText="添加学生经历"
+        addButtonText="添加技能"
       />
     </div>
   )
