@@ -3,6 +3,7 @@
 import { useRef } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
+import { TemplateSec } from "@/components/resume/sections/rightsidebar/TemplateSec"
 import { 
   Layout, Palette, Share2, Download,
   Type, Grid, LayoutTemplate
@@ -37,7 +38,11 @@ export function RightSidebar() {
       {/* 左侧内容区域 */}
       <ScrollArea className="h-[calc(100vh-4rem)] flex-1">
         <div ref={contentRef} className="space-y-8 p-6">
-          {sections.map(({ id, title }) => (
+          {/* 模板部分 */}
+          <TemplateSec />
+
+          {/* 其他部分保持不变 */}
+          {sections.slice(1).map(({ id, title }) => (
             <section key={id} id={id} className="space-y-4">
               <h2 className="text-lg font-semibold">{title}</h2>
               <div className="rounded-lg border bg-card p-4">
